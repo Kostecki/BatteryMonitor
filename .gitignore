@@ -113,4 +113,15 @@ Temporary Items
 # Ignore all local history of files
 .history
 
+### Firebase ###
+.idea
+**/node_modules/*
+**/.firebaserc
+
+### Firebase Patch ###
+.runtimeconfig.json
+.firebase/
+
+*.plist
+
 # End of https://www.toptal.com/developers/gitignore/api/flutter,dart,visualstudiocode,macos
