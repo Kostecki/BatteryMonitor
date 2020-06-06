@@ -15,7 +15,7 @@ class DatabaseService {
         manufacturer: doc.data['manufacturer'] ?? '',
         model: doc.data['model'] ?? '',
         capacity: doc.data['capacity'] ?? 0,
-        voltage: doc.data['voltage'] ?? 0,
+        voltage: doc.data['latestVoltage'] ?? 0,
       );
     }).toList();
   }

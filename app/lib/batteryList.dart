@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:js/js.dart' if (dart.library.io) 'dart:ffi';
+import 'package:progress_indicators/progress_indicators.dart';
 
 import 'package:app/singleBattery.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,9 @@ class _BatteryListState extends State<BatteryList> {
 
     return ListView(
       children: <Widget>[
+        // JumpingDotsProgressIndicator(
+        //   fontSize: 20.0,
+        // ),
         ...batteries.map((battery) {
           return SingleBattery(
             battery: battery,
