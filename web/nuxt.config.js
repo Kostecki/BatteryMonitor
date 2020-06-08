@@ -21,6 +21,9 @@ module.exports = {
   serverMiddleware: [
     '~/server/api/index.js'
   ],
+  server: {
+    host: '0.0.0.0'
+  },
   /*
   ** Customize the progress-bar color
   */
