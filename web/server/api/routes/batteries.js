@@ -115,10 +115,15 @@ router.post('/batteriesSlack', (req, res, next) => {
     ]
   }
 
+  const batteryList = []
+
   BatteriesModel.find({}, (err, batteries) => {
     if (err) return res.status(500).send(`Error finding batteries: ${err}`)
 
-    batteries.forEach(battery => {
+    batteries.forEach(battery => batteryList.push(battery))
+    batteryList.sort((a, b) => a.latestVoltage - b.latestVoltage).reverse() // Sort by Latest Voltage (largest first)
+
+    batteryList.forEach(battery => {
       payload.blocks[0].fields.push({
         type: 'mrkdwn',
         text: `*${battery.name} (_${calcBatteryCharge(battery.latestVoltage)}%, ${battery.latestVoltage} Volt_)* \n _${battery.manufacturer}, ${battery.model} (${battery.capacity} Ah)_`
