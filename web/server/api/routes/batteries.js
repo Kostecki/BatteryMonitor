@@ -105,7 +105,7 @@ router.post('/measurement', (req, res, next) => {
   })
 })
 
-router.get('/batteriesSlack', (req, res, next) => {
+router.post('/batteriesSlack', (req, res, next) => {
   const payload = {
     blocks: [
       {
