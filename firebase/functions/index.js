@@ -125,9 +125,6 @@ const postToSlack = (charge, curBattery, curBatteryData) => {
       }
     ]
   }
-
-  console.log('before axios')
-  console.log(url)
   
   return axios.post(url, JSON.stringify(payload))
     .then(() => {
