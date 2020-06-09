@@ -119,7 +119,7 @@ router.post('/batteriesSlack', (req, res, next) => {
 /* "Triggers" */
 // Update given battery with new "latestVoltage"
 const setLatestVoltage = (batteryId, newVoltage) => {
-  const update = { latestVoltage: newVoltage }
+  const update = { latestVoltage: newVoltage, updatedAt: admin.firestore.FieldValue.serverTimestamp() }
 
   docRefBatteries.doc(batteryId).update(update)
     .catch(err => console.error(err))
@@ -135,7 +135,8 @@ const sendNotification = (batteryId, newVoltage) => {
           notificationsSent: {
             first: false,
             second: false
-          }
+          },
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
         })
         .catch(() => res.status(500).send(`Error updating notificationsSent: ${err}`))
       }
@@ -179,7 +180,8 @@ const postToSlack = (chargeLevel, batteryData, batteryId, newVoltage) => {
         notificationsSent: {
           first: true,
           second: charge === 50 ? false : true
-        }
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
       })
       .catch(err => console.error(`Error updating notification status: ${err}`))
     })
