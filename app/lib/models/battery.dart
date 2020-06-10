@@ -5,6 +5,11 @@ class Battery {
   final num capacity;
   final num voltage;
 
-  Battery(
-      {this.name, this.manufacturer, this.model, this.capacity, this.voltage});
+  Battery({
+    this.name,
+    this.manufacturer,
+    this.model,
+    this.capacity,
+    this.voltage,
+  });
 }

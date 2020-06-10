@@ -25,17 +25,18 @@ class Home extends StatelessWidget {
     return StreamProvider<List<Battery>>.value(
       value: DatabaseService().batteries,
       child: Scaffold(
-          backgroundColor: Colors.grey[200],
-          appBar: AppBar(
-            title: Text('Battery Monitor'),
-            centerTitle: true,
-            backgroundColor: Colors.orangeAccent[700],
-            elevation: 2,
-          ),
-          body: Padding(
-            padding: EdgeInsets.all(5.0),
-            child: BatteryList(),
-          )),
+        backgroundColor: Colors.grey[200],
+        appBar: AppBar(
+          title: Text('Battery Monitor'),
+          centerTitle: true,
+          backgroundColor: Colors.orangeAccent[700],
+          elevation: 2,
+        ),
+        body: Padding(
+          padding: EdgeInsets.all(5.0),
+          child: BatteryList(),
+        ),
+      ),
     );
   }
 }
