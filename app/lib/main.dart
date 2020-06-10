@@ -5,6 +5,7 @@ import 'package:app/services/database.dart';
 import 'package:app/models/battery.dart';
 
 import './batteryList.dart';
+import './settings.dart';
 
 void main() => runApp(MaterialApp(home: Home()));
 
@@ -19,7 +20,27 @@ class BatteryMonitor extends StatelessWidget {
   }
 }
 
-class Home extends StatelessWidget {
+class BatteryMonitorStatefulWidget extends StatefulWidget {
+  BatteryMonitorStatefulWidget({Key key}) : super(key: key);
+
+  @override
+  _BatteryMonitorState createState() => _BatteryMonitorState();
+}
+
+class _BatteryMonitorState extends State<BatteryMonitorStatefulWidget> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  static List<Widget> _widgetSelector = <Widget>[
+    BatteryList(),
+    Settings(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return StreamProvider<List<Battery>>.value(
