@@ -6,20 +6,48 @@ import 'package:app/models/battery.dart';
 
 import './batteryList.dart';
 
-void main() => runApp(MaterialApp(home: Home()));
+void main() => runApp(BatteryMonitor());
 
 class BatteryMonitor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Battery Monitor',
-      theme: ThemeData(primarySwatch: Colors.orangeAccent[700]),
-      home: Home(),
+      theme: ThemeData(primaryColor: Colors.orangeAccent[700]),
+      home: BatteryMonitorStatefulWidget(),
     );
   }
 }
 
-class Home extends StatelessWidget {
+class BatteryMonitorStatefulWidget extends StatefulWidget {
+  BatteryMonitorStatefulWidget({Key key}) : super(key: key);
+
+  @override
+  _BatteryMonitorState createState() => _BatteryMonitorState();
+}
+
+class _BatteryMonitorState extends State<BatteryMonitorStatefulWidget> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  static List<Widget> _widgetSelector = <Widget>[
+    BatteryList(),
+    Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Center(
+          child: Text('Settings'),
+        )
+      ],
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return StreamProvider<List<Battery>>.value(
@@ -34,7 +62,22 @@ class Home extends StatelessWidget {
         ),
         body: Padding(
           padding: EdgeInsets.all(5.0),
-          child: BatteryList(),
+          child: _widgetSelector[_selectedIndex],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.battery_charging_full),
+              title: Text('Batteries'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              title: Text('Settings'),
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.orange[800],
+          onTap: _onItemTapped,
         ),
       ),
     );
