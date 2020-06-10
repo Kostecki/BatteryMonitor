@@ -7,15 +7,15 @@ import 'package:app/models/battery.dart';
 import './batteryList.dart';
 import './settings.dart';
 
-void main() => runApp(MaterialApp(home: Home()));
+void main() => runApp(BatteryMonitor());
 
 class BatteryMonitor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Battery Monitor',
-      theme: ThemeData(primarySwatch: Colors.orangeAccent[700]),
-      home: Home(),
+      theme: ThemeData(primaryColor: Colors.orangeAccent[700]),
+      home: BatteryMonitorStatefulWidget(),
     );
   }
 }
@@ -55,7 +55,22 @@ class _BatteryMonitorState extends State<BatteryMonitorStatefulWidget> {
         ),
         body: Padding(
           padding: EdgeInsets.all(5.0),
-          child: BatteryList(),
+          child: _widgetSelector[_selectedIndex],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.battery_charging_full),
+              title: Text('Batteries'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              title: Text('Settings'),
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.orange[800],
+          onTap: _onItemTapped,
         ),
       ),
     );
