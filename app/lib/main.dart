@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:app/services/database.dart';
 import 'package:app/models/battery.dart';
 
-import './batteryList.dart';
-import './settings.dart';
+import './batteries/batteryList.dart';
+import './settings/settings.dart';
 
 void main() => runApp(BatteryMonitor());
 
