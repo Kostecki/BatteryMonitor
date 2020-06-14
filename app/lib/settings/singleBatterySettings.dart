@@ -7,9 +7,16 @@ class SingleBatterySettings extends StatelessWidget {
   final Battery battery;
   SingleBatterySettings({@required this.battery});
 
+  void deleteBattery(batteryID) {
+    // TODO: Open modal(?) to edit battery
+    // SimpleDialog https://api.flutter.dev/flutter/material/SimpleDialog-class.html
+    print('Delete' + ' ' + batteryID);
+  }
+
   void editBattery(batteryID) {
     // TODO: Open modal(?) to edit battery
-    print('Clicked' + ' ' + batteryID);
+    // SimpleDialog https://api.flutter.dev/flutter/material/SimpleDialog-class.html
+    print('Edit' + ' ' + batteryID);
   }
 
   @override
@@ -34,9 +41,21 @@ class SingleBatterySettings extends StatelessWidget {
                   ],
                 ),
               ),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () => editBattery(battery.id),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  InkWell(
+                    customBorder: CircleBorder(),
+                    child: Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: const Icon(
+                        Icons.edit,
+                        size: 25.0,
+                      ),
+                    ),
+                    onTap: () => editBattery(battery.id),
+                  ),
+                ],
               ),
             ),
           ),

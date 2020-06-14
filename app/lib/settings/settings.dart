@@ -42,7 +42,7 @@ class _SettingsState extends State<Settings> {
 
   Future<Map<String, dynamic>> createBattery(String newBatteryData) async {
     http.Response response = await http.post(
-      'http://localhost:3000/api/battery',
+      'https://battery.israndom.win/api/battery', // TODO: not like this
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -95,18 +95,19 @@ class _SettingsState extends State<Settings> {
                       context: context,
                       builder: (_) => new AlertDialog(
                         title: new Text("Add New Battery"),
+                        scrollable: true,
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Form(
                               key: _formKey,
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   TextFormField(
                                     controller: nameController,
-                                    decoration:
-                                        InputDecoration(labelText: 'Name'),
+                                    decoration: InputDecoration(
+                                      labelText: 'Name',
+                                    ),
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter a name';
@@ -117,7 +118,8 @@ class _SettingsState extends State<Settings> {
                                   TextFormField(
                                     controller: manufacturerController,
                                     decoration: InputDecoration(
-                                        labelText: 'Manufacturer'),
+                                      labelText: 'Manufacturer',
+                                    ),
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter a manufacturer';
@@ -127,8 +129,9 @@ class _SettingsState extends State<Settings> {
                                   ),
                                   TextFormField(
                                     controller: modelController,
-                                    decoration:
-                                        InputDecoration(labelText: 'Model'),
+                                    decoration: InputDecoration(
+                                      labelText: 'Model',
+                                    ),
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter a model';
@@ -140,19 +143,20 @@ class _SettingsState extends State<Settings> {
                                     controller: latestVoltageController,
                                     decoration: InputDecoration(
                                         labelText: 'Latest Voltage (Volt)'),
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: <TextInputFormatter>[
-                                      WhitelistingTextInputFormatter.digitsOnly
-                                    ],
+                                    keyboardType:
+                                        TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
                                   ),
                                   TextFormField(
                                     controller: capacityController,
                                     decoration: InputDecoration(
-                                        labelText: 'Capcacity (Ah)'),
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: <TextInputFormatter>[
-                                      WhitelistingTextInputFormatter.digitsOnly
-                                    ],
+                                      labelText: 'Capcacity (Ah)',
+                                    ),
+                                    keyboardType:
+                                        TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter a capacity';
@@ -172,16 +176,21 @@ class _SettingsState extends State<Settings> {
                               if (_formKey.currentState.validate()) {
                                 // Start loading
 
+                                // Handle command instead of period for numbers
+                                String capacity = capacityController.text
+                                    .replaceAll(",", ".");
+                                String latestVoltage = latestVoltageController
+                                    .text
+                                    .replaceAll(",", ".");
+
                                 Map<String, dynamic> newBattery = {
                                   "name": nameController.text,
                                   "manufacturer": manufacturerController.text,
                                   "model": modelController.text,
-                                  "capacity": double.tryParse(
-                                          capacityController.text) ??
-                                      capacityController.text,
-                                  "latestVoltage": double.tryParse(
-                                          latestVoltageController.text) ??
-                                      0,
+                                  "capacity":
+                                      double.tryParse(capacity) ?? capacity,
+                                  "latestVoltage":
+                                      double.tryParse(latestVoltage) ?? 0,
                                 };
 
                                 String newBatteryJSON = jsonEncode(newBattery);
