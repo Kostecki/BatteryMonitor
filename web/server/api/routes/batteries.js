@@ -38,8 +38,7 @@ router.post('/battery', (req, res, next) => {
     manufacturer,
     model,
     capacity,
-    latestVoltage,
-    notificationsSent
+    latestVoltage
   } = req.body
 
   const timestamp = admin.firestore.FieldValue.serverTimestamp()
@@ -62,7 +61,7 @@ router.post('/battery', (req, res, next) => {
       .then(snapshot => res.status(201).json(snapshot.data()))
       .catch(err => res.status(500).send(`Error getting newly created battery: ${err}`))
   })
-  .catch(err => res.status(500).send(`Error craeting new battery: ${err}`))
+  .catch(err => res.status(500).send(`Error creating new battery: ${err}`))
 })
 
 // POST to create measurement
