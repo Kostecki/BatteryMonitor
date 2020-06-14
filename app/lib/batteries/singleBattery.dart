@@ -38,7 +38,7 @@ class SingleBattery extends StatelessWidget {
             subtitle: Padding(
               padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
               child: Text(
-                '${battery.manufacturer}, ${battery.model}\nVoltage: ${battery.voltage} V',
+                '${battery.manufacturer}, ${battery.model}\nVoltage: ${battery.voltage} Volt',
               ),
             ),
             isThreeLine: true,

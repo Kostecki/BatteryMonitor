@@ -18,4 +18,14 @@ class Battery {
     this.voltage,
     this.updatedAt,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      "name": this.name,
+      "manufacturer": this.manufacturer,
+      "model": this.model,
+      "latestVoltage": this.voltage,
+      "capacity": this.capacity
+    };
+  }
 }
