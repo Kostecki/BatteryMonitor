@@ -50,13 +50,16 @@ router.post('/battery', (req, res, next) => {
     model,
     capacity,
     latestVoltage,
-    notificationsSent,
+    notificationsSent: {
+      first: false,
+      second: false
+    },
     createdAt: timestamp,
     updatedAt: timestamp
   })
   .then(ref => {
     docRefBatteries.doc(ref.id).get()
-      .then(snapshot => res.status(200).json(snapshot.data()))
+      .then(snapshot => res.status(201).json(snapshot.data()))
       .catch(err => res.status(500).send(`Error getting newly created battery: ${err}`))
   })
   .catch(err => res.status(500).send(`Error craeting new battery: ${err}`))
@@ -77,7 +80,7 @@ router.post('/measurement', (req, res, next) => {
         console.log(batteryId, voltage)
         setLatestVoltage(batteryId, voltage)
         sendNotification(batteryId, voltage)
-        res.status(200).json(snapshot.data())
+        res.status(201).json(snapshot.data())
       })
       .catch(err => res.status(500).send(`Error getting newly created measurement: ${err}`))
   })
