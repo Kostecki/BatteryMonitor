@@ -16,7 +16,7 @@ const docRefBatteries = db.collection('batteries')
 const docRefMeasurements = db.collection('measurements')
 
 // GET single battery by id
-router.get('/battery/:id', (req, res, next) => {
+router.get('/battery/:id', (req, res) => {
   const id = req.params.id
 
   docRefBatteries.doc(id).get()
@@ -25,14 +25,14 @@ router.get('/battery/:id', (req, res, next) => {
 })
 
 // GET all batteries
-router.get('/batteries', (req, res, next) => {
+router.get('/batteries', (req, res) => {
   docRefBatteries.get()
     .then(snapshot => res.status(200).json(snapshot.docs.map(doc => doc.data())))
     .catch(err => res.status(500).send(`Error getting batteries: ${err}`))
 })
 
 // POST to create battery
-router.post('/battery', (req, res, next) => {
+router.post('/battery', (req, res) => {
   const {
     name,
     manufacturer,
@@ -65,7 +65,7 @@ router.post('/battery', (req, res, next) => {
 })
 
 // PUT to update battery
-router.put('/battery', (req, res, next) => {
+router.put('/battery', (req, res) => {
   const {
     id,
     name,
@@ -76,8 +76,6 @@ router.put('/battery', (req, res, next) => {
   } = req.body
 
   const timestamp = admin.firestore.FieldValue.serverTimestamp()
-
-  console.log(id)
 
   docRefBatteries.doc(id).update({
     name,
@@ -92,14 +90,21 @@ router.put('/battery', (req, res, next) => {
       .then(snapshot => res.status(200).json(snapshot.data()))
       .catch(err => res.status(500).send(`Error getting newly updated battery: ${err}`))
   })
-  .catch(err => {
-    console.log(err)
-    res.status(500).send(`Error updating battery: ${err}`)
-  })
+  .catch(err => res.status(500).send(`Error updating battery: ${err}`))
+})
+
+// DELETE to delete battery
+router.delete('/battery/:id', (req, res) => {
+  console.log('delete')
+  const id = req.params.id
+
+  docRefBatteries.doc(id).delete()
+    .then(() => res.status(204).send())
+    .catch(err => res.status(500).send(`Error deleting battery: ${err}`))
 })
 
 // POST to create measurement
-router.post('/measurement', (req, res, next) => {
+router.post('/measurement', (req, res) => {
   const { batteryId, voltage } = req.body
 
   docRefMeasurements.add({
@@ -110,7 +115,6 @@ router.post('/measurement', (req, res, next) => {
   .then(ref => {
     docRefMeasurements.doc(ref.id).get()
       .then(snapshot => {
-        console.log(batteryId, voltage)
         setLatestVoltage(batteryId, voltage)
         sendNotification(batteryId, voltage)
         res.status(201).json(snapshot.data())
@@ -121,7 +125,7 @@ router.post('/measurement', (req, res, next) => {
 })
 
 // Slack slash-command response with status for all batteries
-router.post('/batteriesSlack', (req, res, next) => {
+router.post('/batteriesSlack', (req, res) => {
   const payload = {
     blocks: [
       {
@@ -137,8 +141,6 @@ router.post('/batteriesSlack', (req, res, next) => {
     .then(snapshot => {
       snapshot.forEach(battery => batteryList.push(battery.data()))
       batteryList.sort((a, b) => a.latestVoltage - b.latestVoltage).reverse() // Sort by Latest Voltage (largest first)
-
-      console.log(batteryList)
 
       batteryList.forEach(battery => {
         payload.blocks[0].fields.push({

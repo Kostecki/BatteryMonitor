@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:app/models/battery.dart';
@@ -68,6 +69,17 @@ class _SingleBatterySettingsState extends State<SingleBatterySettings> {
     }
   }
 
+  Future<Map<String, dynamic>> deleteBattery(String batteryId) async {
+    http.Response response = await http
+        .delete('https://battery.israndom.win/api/battery/$batteryId');
+
+    if (response.statusCode == 204) {
+      return {"data": 'OK', "status": "success"};
+    } else {
+      return {"data": response.body, "status": "error"};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -99,7 +111,87 @@ class _SingleBatterySettingsState extends State<SingleBatterySettings> {
                     customBorder: CircleBorder(),
                     child: Container(
                       padding: EdgeInsets.all(10.0),
-                      child: const Icon(
+                      child: Icon(Icons.delete, size: 25.0),
+                    ),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => CupertinoAlertDialog(
+                          content: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              text: 'Are you sure want to delete: \n',
+                              style: TextStyle(
+                                color: Colors.black,
+                              ),
+                              children: <TextSpan>[
+                                TextSpan(
+                                  text: '${widget.battery.name}?',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          actions: [
+                            CupertinoDialogAction(
+                              child: Text('No'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            CupertinoDialogAction(
+                              child: Text('Yes'),
+                              onPressed: () {
+                                deleteBattery(widget.battery.id).then(
+                                  (response) {
+                                    if (response['status'] == 'success') {
+                                      Scaffold.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              'Successfully deleted battery'),
+                                        ),
+                                      );
+
+                                      Navigator.of(context).pop();
+                                    } else {
+                                      Scaffold.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: RichText(
+                                            text: TextSpan(
+                                              text: 'Something went wrong: ',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                              children: <TextSpan>[
+                                                TextSpan(
+                                                  text: response['data'],
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  InkWell(
+                    customBorder: CircleBorder(),
+                    child: Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: Icon(
                         Icons.edit,
                         size: 25.0,
                       ),
