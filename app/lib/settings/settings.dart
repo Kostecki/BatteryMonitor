@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -182,7 +183,7 @@ class _SettingsState extends State<Settings> {
                           ],
                         ),
                         actions: <Widget>[
-                          FlatButton(
+                          CupertinoButton(
                             child: Text('Save'),
                             onPressed: () {
                               if (_formKey.currentState.validate()) {

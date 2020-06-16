@@ -122,33 +122,21 @@ class _SingleBatterySettingsState extends State<SingleBatterySettings> {
                       showDialog(
                         context: context,
                         builder: (_) => CupertinoAlertDialog(
-                          content: RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              text: 'Are you sure want to delete: \n',
-                              style: TextStyle(
-                                color: Colors.black,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: '${widget.battery.name}?',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          actions: [
+                          title: Text('Delete "${widget.battery.name}"?'),
+                          content: Text('This action cannot be undone'),
+                          actions: <Widget>[
                             CupertinoDialogAction(
-                              child: Text('No'),
+                              isDefaultAction: true,
+                              child: Text('Cancel'),
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
                             ),
                             CupertinoDialogAction(
-                              child: Text('Yes'),
+                              isDestructiveAction: true,
+                              child: Text(
+                                'Delete',
+                              ),
                               onPressed: () {
                                 deleteBattery(widget.battery.id).then(
                                   (response) {
@@ -295,7 +283,7 @@ class _SingleBatterySettingsState extends State<SingleBatterySettings> {
                             ],
                           ),
                           actions: <Widget>[
-                            FlatButton(
+                            CupertinoButton(
                               child: Text('Update'),
                               onPressed: () {
                                 if (_formKey.currentState.validate()) {
