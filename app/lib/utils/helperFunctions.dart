@@ -38,6 +38,16 @@ class HelperFunctions {
     }
   }
 
+  static Color setNotificationStatus(Map<String, dynamic> notificationStatus) {
+    if (notificationStatus['second']) {
+      return Colors.red;
+    } else if (notificationStatus['first']) {
+      return Colors.yellowAccent[700];
+    } else {
+      return Colors.white;
+    }
+  }
+
   static String convertTimestamp(int timestampInSeconds,
       {String dateFormat = 'dd-MM-yyyy hh:mm'}) {
     final df = new DateFormat('dd-MM-yyyy hh:mm');

@@ -18,6 +18,7 @@ class DatabaseService {
         capacity: doc.data['capacity'],
         voltage: doc.data['latestVoltage'],
         updatedAt: doc.data['updatedAt'],
+        notificationsSent: doc.data['notificationsSent'],
       );
     }).toList();
   }

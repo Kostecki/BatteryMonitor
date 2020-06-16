@@ -8,6 +8,7 @@ class Battery {
   final num capacity;
   final num voltage;
   final Timestamp updatedAt;
+  final Map<String, dynamic> notificationsSent;
 
   Battery({
     this.id,
@@ -17,6 +18,7 @@ class Battery {
     this.capacity,
     this.voltage,
     this.updatedAt,
+    this.notificationsSent,
   });
 
   Map<String, dynamic> toJson() {
