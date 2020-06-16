@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:app/app_config.dart';
 import 'package:app/models/battery.dart';
 import 'package:app/settings/singleBatterySettings.dart';
 
@@ -41,8 +42,10 @@ class _SettingsState extends State<Settings> {
   }
 
   Future<Map<String, dynamic>> createBattery(String newBatteryData) async {
+    var config = AppConfig.of(context);
+
     http.Response response = await http.post(
-      'https://battery.israndom.win/api/battery', // TODO: not like this
+      '${config.apiBaseUrl}/battery',
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
