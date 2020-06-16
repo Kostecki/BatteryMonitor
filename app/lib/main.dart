@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:app/app_config.dart';
 import 'package:app/services/database.dart';
 import 'package:app/models/battery.dart';
 
 import './batteries/batteryList.dart';
 import './settings/settings.dart';
 
-void main() => runApp(BatteryMonitor());
-
 class BatteryMonitor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Environment specific configuration
+    var config = AppConfig.of(context);
+
     return MaterialApp(
-      title: 'Battery Monitor',
+      title: config.appName,
       theme: ThemeData(primaryColor: Colors.orangeAccent[700]),
       home: BatteryMonitorStatefulWidget(),
     );
@@ -43,12 +45,14 @@ class _BatteryMonitorState extends State<BatteryMonitorStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var config = AppConfig.of(context);
+
     return StreamProvider<List<Battery>>.value(
       value: DatabaseService().batteries,
       child: Scaffold(
         backgroundColor: Colors.grey[200],
         appBar: AppBar(
-          title: Text('Battery Monitor'),
+          title: Text(config.appName),
           centerTitle: true,
           backgroundColor: Colors.orangeAccent[700],
           elevation: 2,

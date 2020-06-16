@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:app/app_config.dart';
 import 'package:app/models/battery.dart';
 import 'package:app/utils/helperFunctions.dart';
 
@@ -53,8 +54,10 @@ class _SingleBatterySettingsState extends State<SingleBatterySettings> {
   }
 
   Future<Map<String, dynamic>> updateBattery(String updatedBatteryData) async {
+    var config = AppConfig.of(context);
+
     http.Response response = await http.put(
-      'http://localhost:3000/api/battery',
+      '${config.apiBaseUrl}/battery',
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -70,8 +73,10 @@ class _SingleBatterySettingsState extends State<SingleBatterySettings> {
   }
 
   Future<Map<String, dynamic>> deleteBattery(String batteryId) async {
-    http.Response response = await http
-        .delete('https://battery.israndom.win/api/battery/$batteryId');
+    var config = AppConfig.of(context);
+
+    http.Response response =
+        await http.delete('${config.apiBaseUrl}/battery/$batteryId');
 
     if (response.statusCode == 204) {
       return {"data": 'OK', "status": "success"};
