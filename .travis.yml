@@ -10,9 +10,8 @@ branches:
 services:
 - docker
 script:
-- docker build --build-arg api_user=$REACT_APP_API_USER --build-arg api_pass=$REACT_APP_API_PASS
-  -t kostecki/megapanel .
+- docker build -t kostecki/batterymonitor web
 after_success:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-- docker push kostecki/megapanel
+- docker push kostecki/batterymonitor
 - curl -X POST -i $PORTAINER_WEBHOOK_URL
