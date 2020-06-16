@@ -64,6 +64,40 @@ router.post('/battery', (req, res, next) => {
   .catch(err => res.status(500).send(`Error creating new battery: ${err}`))
 })
 
+// PUT to update battery
+router.put('/battery', (req, res, next) => {
+  const {
+    id,
+    name,
+    manufacturer,
+    model,
+    capacity,
+    latestVoltage
+  } = req.body
+
+  const timestamp = admin.firestore.FieldValue.serverTimestamp()
+
+  console.log(id)
+
+  docRefBatteries.doc(id).update({
+    name,
+    manufacturer,
+    model,
+    capacity,
+    latestVoltage,
+    updatedAt: timestamp
+  })
+  .then(ref => {
+    docRefBatteries.doc(id).get()
+      .then(snapshot => res.status(200).json(snapshot.data()))
+      .catch(err => res.status(500).send(`Error getting newly updated battery: ${err}`))
+  })
+  .catch(err => {
+    console.log(err)
+    res.status(500).send(`Error updating battery: ${err}`)
+  })
+})
+
 // POST to create measurement
 router.post('/measurement', (req, res, next) => {
   const { batteryId, voltage } = req.body

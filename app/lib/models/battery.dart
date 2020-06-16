@@ -21,6 +21,7 @@ class Battery {
 
   Map<String, dynamic> toJson() {
     return {
+      "id": this.id,
       "name": this.name,
       "manufacturer": this.manufacturer,
       "model": this.model,

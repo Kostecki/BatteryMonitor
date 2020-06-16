@@ -108,6 +108,8 @@ class _SettingsState extends State<Settings> {
                                     decoration: InputDecoration(
                                       labelText: 'Name',
                                     ),
+                                    autocorrect: false,
+                                    enableSuggestions: false,
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter a name';
@@ -120,6 +122,8 @@ class _SettingsState extends State<Settings> {
                                     decoration: InputDecoration(
                                       labelText: 'Manufacturer',
                                     ),
+                                    autocorrect: false,
+                                    enableSuggestions: false,
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter a manufacturer';
@@ -132,6 +136,8 @@ class _SettingsState extends State<Settings> {
                                     decoration: InputDecoration(
                                       labelText: 'Model',
                                     ),
+                                    autocorrect: false,
+                                    enableSuggestions: false,
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter a model';
@@ -142,7 +148,9 @@ class _SettingsState extends State<Settings> {
                                   TextFormField(
                                     controller: latestVoltageController,
                                     decoration: InputDecoration(
-                                        labelText: 'Latest Voltage (Volt)'),
+                                      labelText: 'Latest Voltage',
+                                      suffixText: 'Volt',
+                                    ),
                                     keyboardType:
                                         TextInputType.numberWithOptions(
                                       decimal: true,
@@ -151,7 +159,8 @@ class _SettingsState extends State<Settings> {
                                   TextFormField(
                                     controller: capacityController,
                                     decoration: InputDecoration(
-                                      labelText: 'Capcacity (Ah)',
+                                      labelText: 'Capcacity',
+                                      suffixText: 'Ah',
                                     ),
                                     keyboardType:
                                         TextInputType.numberWithOptions(
@@ -176,7 +185,7 @@ class _SettingsState extends State<Settings> {
                               if (_formKey.currentState.validate()) {
                                 // Start loading
 
-                                // Handle command instead of period for numbers
+                                // Handle comma instead of period for numbers
                                 String capacity = capacityController.text
                                     .replaceAll(",", ".");
                                 String latestVoltage = latestVoltageController
