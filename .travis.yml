@@ -2,7 +2,7 @@ notifications:
   email: false
   slack:
     rooms:
-      secure: 1vIwPwaJZqqiSo2vzM4f4mygf1WdkbZ9VPiwQNRJvNc2fEEZz+qYgUbPgvMXCFSZuRWDR2JefsUaqIQP/1YKtzV8sGeLwcIrYLwzJmi1I01v2laT1GIQQ7uFPdeOiRY+LKMtQI4iddaEbxfDno/NTv5Tzj1Jm719yjkoziYFos28FX+beIieCU97VtS7hN/yMes2VP2dNmXufHAAVileGSDEUys6sYVgaFpWEAyJm9l3PxsvoVn69ZJmrvLGBaR1bweYhU7uH7CYr6POaEVpJD8wVt6qhsaPpJFu3Lx9rOE8cQpTKSerkygqECu/Z/JV5ccKBMfRgXdzGF1wB7MED17rOxmY6rW8M9ewmNtwgtpaNpRUv0TPkr8gQGWvv82/tNGT5cT8iWtCaBACbvRbn1RjUT/c4ZzRXT3tmtrfda7GHHFMgDrXT5iKhBTuVA6sUbkB6cKuLpgqko2+ofa4kz0wQyNY+X+GMQ2NHsmMvqWle9Pdgiry8Oe8cvijM2MTggQvaYFcg5x2TRkR3yH++Q20WLi3K2AWbGOkh1Tc60kg09E/cI+D8QeJJ7UmnVt2GfAmNZyRfPEuvf0cRzKPcR0rkhMpsQMal7B/KLNJ9bP/jmtNmeXLLZUlzEkOmtxFPcQUR+2cfrZafwBEOeirPJmwCZ3i42Qv1VlKYLl30VY=
+      - secure: nMJkHrSpzfuLT79PnZlY/5REpic5PCku927EAulj7kYy830aWp/ndqXrgoeJED+g2e8Qlr4EBPa3mPioVPPRMWoU5mkujbUx9SHL/GU/hNdVAWfH6sIAm0C5Dn2THCe+CsYAyFGPKREH/pCyZ/fEBt0LITsAWVbTnqGfTZwyXpJ1Kp8tj8L96EfI6lUEGgCoAqAA5eQ6yzvK40bbznxFZXcNef38dqwAJfFi09VM0P6RrGZJS+YilqLaGvQ+X0MhvLuApjaLFkhYN6R8uGl00noj05UR1xWhazmKlfK4uRLKZCsWDCj2cScwAuVv3tzDXRc0CB45jOIEFs6Fcm85F3s7qciWfHUc1jxczhZggVcQ/r8D1AEW3FeQQu5jhX+PpFghiTp+6utVjKH0AUiOmFYgo1TONKBcNoaV4lyd1wmWC704y58v0/WCMZV8/BPMFRSjqSCYnR7MpYpOEq0PPjNQ1rtXHuxu4o9HEi6xeWeuNaD5bi/H4uiMeOQFosMhfT+5H1LLnLkOvAcMd7DwzwcfGA4NY4q3BLe0rMSXInv/mzER4fYeeRel3th38LRAK+rPCfloiCGe3T96n5fXfKK3LvEDFlumI+zaFpIAwBpoG7efa1mk8cvS1SfeqgjM4kk/y5uVBd8e1+uonXlOh4yqDURM5znV8S0Qyc0qRo4=
 sudo: required
 branches:
   only:
@@ -10,7 +10,7 @@ branches:
 services:
 - docker
 script:
-- docker build -t kostecki/megapanel web
+- docker build -t kostecki/batterymonitor web
 after_success:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 - docker push kostecki/batterymonitor
