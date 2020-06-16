@@ -11,11 +11,13 @@ class DatabaseService {
   List<Battery> _batteryListFromSnapshot(QuerySnapshot snapshot) {
     return snapshot.documents.map((doc) {
       return Battery(
+        id: doc.documentID,
         name: doc.data['name'],
         manufacturer: doc.data['manufacturer'],
         model: doc.data['model'],
         capacity: doc.data['capacity'],
         voltage: doc.data['latestVoltage'],
+        updatedAt: doc.data['updatedAt'],
       );
     }).toList();
   }
