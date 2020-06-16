@@ -295,7 +295,7 @@ class _SingleBatterySettingsState extends State<SingleBatterySettings> {
                             ],
                           ),
                           actions: <Widget>[
-                            FlatButton(
+                            CupertinoButton(
                               child: Text('Update'),
                               onPressed: () {
                                 if (_formKey.currentState.validate()) {
