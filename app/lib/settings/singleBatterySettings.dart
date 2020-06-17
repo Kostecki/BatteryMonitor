@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:app/app_config.dart';
-import 'package:app/models/battery.dart';
-import 'package:app/utils/helperFunctions.dart';
+import 'package:BatteryMonitor/app_config.dart';
+import 'package:BatteryMonitor/models/battery.dart';
+import 'package:BatteryMonitor/utils/helperFunctions.dart';
 
 class SingleBatterySettings extends StatefulWidget {
   final Battery battery;

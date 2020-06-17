@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:app/models/battery.dart';
+import 'package:BatteryMonitor/models/battery.dart';
 
 class DatabaseService {
   // Collection reference

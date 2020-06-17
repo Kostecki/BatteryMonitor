@@ -7,9 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:app/app_config.dart';
-import 'package:app/models/battery.dart';
-import 'package:app/settings/singleBatterySettings.dart';
+import 'package:BatteryMonitor/app_config.dart';
+import 'package:BatteryMonitor/models/battery.dart';
+import 'package:BatteryMonitor/settings/singleBatterySettings.dart';
 
 class Settings extends StatefulWidget {
   @override

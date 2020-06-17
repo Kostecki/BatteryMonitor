@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
-import 'package:app/models/battery.dart';
+import 'package:BatteryMonitor/models/battery.dart';
 
-import 'package:app/batteries/singleBattery.dart';
+import 'package:BatteryMonitor/batteries/singleBattery.dart';
 
 class BatteryList extends StatefulWidget {
   @override

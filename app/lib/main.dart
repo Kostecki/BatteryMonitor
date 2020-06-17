@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:app/app_config.dart';
-import 'package:app/services/database.dart';
-import 'package:app/models/battery.dart';
+import 'package:BatteryMonitor/app_config.dart';
+import 'package:BatteryMonitor/services/database.dart';
+import 'package:BatteryMonitor/models/battery.dart';
 
 import './batteries/batteryList.dart';
 import './settings/settings.dart';

@@ -1,5 +1,5 @@
-import 'package:app/app_config.dart';
-import 'package:app/main.dart';
+import 'package:BatteryMonitor/app_config.dart';
+import 'package:BatteryMonitor/main.dart';
 import 'package:flutter/material.dart';
 
 void main() {
