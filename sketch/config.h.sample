@@ -1,0 +1,16 @@
+// Device information
+const char* HOSTNAME = "";
+const char* BATTERY_ID = "";
+const char* BATTERY_NAME = "";
+
+//API
+const char* API_URL = "";
+
+//WIFI
+const char* WIFI_SSID = "";
+const char* WIFI_PASSWORD = "";
+
+//OTA
+int OTA_PORT = ;
+const char* OTA_NAME = "";
+const char* OTA_PASSWORD = ""; 
