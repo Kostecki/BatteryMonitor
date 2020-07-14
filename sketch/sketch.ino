@@ -17,7 +17,12 @@ float R1 = 30000.0; // resistance of R1 (30K)
 float R2 = 7500.0; // resistance of R2 (7.5K)
 int value = 0;
 
-bool warningLED = true;
+int warningVoltage = 11.66
+bool warningLED = false;
+
+unsigned long previousMillis = 0;
+const int logIntervalHours = 6 // Hours between measurements (in hours)
+const long logInterval = logIntervalHours * 3600000; // Convert hours (from logIntervalHours) to milliseconds
 
 void setup(){
   Serial.begin(9600);
@@ -50,12 +55,18 @@ void setup(){
 
 void loop(){
     ArduinoOTA.handle();
-  
+
+    // Turn on red "warning led" if voltage is less than 20%
     if (warningLED) {
       digitalWrite(LEDPin, HIGH);
     }
 
-    createMeasurement();
+    // Measure voltage every 6 (logInterval) hours
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= logInterval) {
+      previousMillis = currentMillis
+      createMeasurement();
+    }
 }
 
 // Measure voltage of connected battery
@@ -65,8 +76,8 @@ float createMeasurement() {
   vout = value * (VCC / 1023.0);
   vin = vout / (R2/(R1+R2));
 
-  // Turn on red "warning led" if voltage is less than 20%
-  if (vin < 11.66) {
+  // Set status-LED.. status
+  if (vin < warningVoltage) {
     warningLED = true;
   } else {
     warningLED = false;
@@ -85,7 +96,7 @@ void sendMeasurement(float measurement) {
   doc["batteryId"] = BATTERY_ID;
   doc["voltage"] = measurement;
 
-  // Serializeed JSON is required for the POST request
+  // Serialized JSON is required for the POST request
   String json;
   serializeJson(doc, json);
 
