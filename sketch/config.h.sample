@@ -11,6 +11,23 @@ const char* WIFI_SSID = "";
 const char* WIFI_PASSWORD = "";
 
 //OTA
-int OTA_PORT = ;
+const int OTA_PORT = 8266;
 const char* OTA_NAME = "";
 const char* OTA_PASSWORD = ""; 
+
+// Hardware setup
+const int VOLTAGE_INPUT_PIN;
+const int LED_PIN;
+const float VCC;
+const float R1; // resistance of R1 (30K)
+const float R2; // resistance of R2 (7.5K)
+
+// Voltage of battery at 20%
+// For Warning-LED
+const int WARNING_VOLTAGE;
+
+// Time Config
+const char* NTP_SERVER = "";
+const char* TZ_INFO = ""; // https://remotemonitoringsystems.ca/time-zone-abbreviations.php
+
+const int LOG_INTERVAL_HOURS; // Hours between measurements (in hours)

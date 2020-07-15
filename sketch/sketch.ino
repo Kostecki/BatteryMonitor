@@ -1,35 +1,31 @@
-//Config
 #include "config.h";
+#include "ntp_time.h";
 
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClientSecureBearSSL.h>
+#include <time.h>
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
+#include <RunningMedian.h>
 
-int analogInput = A0;
-int LEDPin = D5;
-float VCC = 3.2;
+// Voltage measurements
+int raw_analog_value = 0;
+float voltage = 0.0;
 
-float vout = 0.0;
-float vin = 0.0;
-float R1 = 30000.0; // resistance of R1 (30K)
-float R2 = 7500.0; // resistance of R2 (7.5K)
-int value = 0;
-
-int warningVoltage = 11.66
+// Warning-LED Status
 bool warningLED = false;
 
+// Logging-interval time keeping
 unsigned long previousMillis = 0;
-const int logIntervalHours = 6 // Hours between measurements (in hours)
-const long logInterval = logIntervalHours * 3600000; // Convert hours (from logIntervalHours) to milliseconds
+const long logInterval = LOG_INTERVAL_HOURS * 3600000; // Convert hours (from logIntervalHours) to milliseconds
 
 void setup(){
   Serial.begin(9600);
 
   // Setup pins: Voltage IN + LED
-  pinMode(analogInput, INPUT);
-  pinMode(LEDPin, OUTPUT);
+  pinMode(VOLTAGE_INPUT_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
 
   // Setup WiFi with Mode, Hostname, SSID and Password
   Serial.println();
@@ -46,6 +42,15 @@ void setup(){
   Serial.print("Conncted, IP address: ");
   Serial.println(WiFi.localIP());
 
+  Serial.print("Measuring battery ");
+  Serial.print(BATTERY_NAME);
+  Serial.print(" (");
+  Serial.print(BATTERY_ID);
+  Serial.print(") ");
+  Serial.print("every ");
+  Serial.print(LOG_INTERVAL_HOURS);
+  Serial.println(" hour(s)");
+
   // Setup OTA
   ArduinoOTA.setPort(OTA_PORT);
   ArduinoOTA.setHostname(OTA_NAME);
@@ -58,32 +63,35 @@ void loop(){
 
     // Turn on red "warning led" if voltage is less than 20%
     if (warningLED) {
-      digitalWrite(LEDPin, HIGH);
+      digitalWrite(LED_PIN, HIGH);
     }
 
     // Measure voltage every 6 (logInterval) hours
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= logInterval) {
-      previousMillis = currentMillis
+      previousMillis = currentMillis;
       createMeasurement();
     }
 }
 
 // Measure voltage of connected battery
 float createMeasurement() {
-  // Divide by 3.2 to account for built-in voltage divider on A0
-  value = (analogRead(analogInput) / 3.2);
-  vout = value * (VCC / 1023.0);
-  vin = vout / (R2/(R1+R2));
+  // Sample battery voltage 100 times and get median value
+  RunningMedian samples = RunningMedian(100);
+  for (int i = 0; i < 100; i++) {
+    raw_analog_value = analogRead(VOLTAGE_INPUT_PIN);
+    voltage = raw_analog_value * 0.01243;  
+    samples.add(voltage);
+  }
 
   // Set status-LED.. status
-  if (vin < warningVoltage) {
+  if (voltage < WARNING_VOLTAGE) {
     warningLED = true;
   } else {
     warningLED = false;
   }
   
-  sendMeasurement(vin);
+  sendMeasurement(voltage);
 }
 
 // Send measured voltage to API
