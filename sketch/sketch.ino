@@ -90,13 +90,15 @@ void sendHeartbeat() {
 
 // Measure voltage of connected battery
 float createMeasurement(bool postToAPI = false) {
-  // Sample battery voltage 100 times and get median value
-  RunningMedian samples = RunningMedian(100);
-  for (int i = 0; i < 100; i++) {
+  // Sample battery voltage 1000 times
+  RunningMedian samples = RunningMedian(1000);
+  for (int i = 0; i < 1000; i++) {
     raw_analog_value = analogRead(VOLTAGE_INPUT_PIN);
-    voltage = raw_analog_value * 0.0124;  //0.01243
-    samples.add(voltage);
+    samples.add(raw_analog_value * 0.01245);
   }
+
+  // Get median sampled voltage
+  voltage = samples.getMedian();
 
   // Set status-LED.. status
   if (voltage < WARNING_VOLTAGE) {
