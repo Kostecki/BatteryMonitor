@@ -4,30 +4,27 @@ const char* BATTERY_ID = "";
 const char* BATTERY_NAME = "";
 
 //API
-const char* API_URL = "";
+const char* API_URL_HEARTBEAT = "";
+const char* API_URL_MEASUREMENT = "";
 
 //WIFI
 const char* WIFI_SSID = "";
 const char* WIFI_PASSWORD = "";
 
 //OTA
-const int OTA_PORT = 8266;
+int OTA_PORT = 8266;
 const char* OTA_NAME = "";
 const char* OTA_PASSWORD = ""; 
 
 // Hardware setup
 const int VOLTAGE_INPUT_PIN;
 const int LED_PIN;
-const float VCC;
-const float R1; // resistance of R1 (30K)
-const float R2; // resistance of R2 (7.5K)
 
 // Voltage of battery at 20%
 // For Warning-LED
 const int WARNING_VOLTAGE;
 
 // Time Config
-const char* NTP_SERVER = "";
-const char* TZ_INFO = ""; // https://remotemonitoringsystems.ca/time-zone-abbreviations.php
-
+const int HEARTBEAT_FREQUENCY_MINUTES; // Frequency of heartbeats sent to API
+const int FIRST_RUN_THRESHOLD_MINUTES; // Threshold after power on to initiate first measurement (without post to API)
 const int LOG_INTERVAL_HOURS; // Hours between measurements (in hours)
