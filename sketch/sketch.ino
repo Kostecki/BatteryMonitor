@@ -1,10 +1,8 @@
 #include "config.h";
-#include "ntp_time.h";
 
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClientSecureBearSSL.h>
-#include <time.h>
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include <RunningMedian.h>
@@ -94,7 +92,8 @@ float createMeasurement(bool postToAPI = false) {
   RunningMedian samples = RunningMedian(1000);
   for (int i = 0; i < 1000; i++) {
     raw_analog_value = analogRead(VOLTAGE_INPUT_PIN);
-    samples.add(raw_analog_value * 0.01245);
+    samples.add(raw_analog_value * 0.01248);
+    delay(50);
   }
 
   // Get median sampled voltage
