@@ -15,8 +15,36 @@ const db = admin.firestore()
 const docRefBatteries = db.collection('batteries')
 const docRefMeasurements = db.collection('measurements')
 
+/**
+ * @Swagger
+ * tags:
+ *  name: Batteries
+ *  description: CRUD information on single or multiple batteries
+ */
+
 // GET single battery by id
-router.get('/battery/:id', (req, res) => {
+/**
+ * @swagger
+ *
+ * /battery/{batteryId}:
+ *   get:
+ *     tags: [Batteries]
+ *     summary: "Get information about a single battery"
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: batteryId
+ *         in: path
+ *         description: "ID of the battery to be fetched"
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Single battery details
+ *         examples:
+ *          application/json: { "name": "Cloud Raven", "lastSeen": null, "latestVoltage": 12.3, "createdAt": { "_seconds": 1591739962, "_nanoseconds": 779000000 }, "model": "GF 12 105 V", "notificationsSent": { "first": false, "second": false }, "capacity": 120, "manufacturer": "Sonnenschein", "updatedAt": { "_seconds": 1595000229, "_nanoseconds": 421000000 } }
+ */
+router.get('/battery/id', (req, res) => {
   const id = req.params.id
 
   docRefBatteries.doc(id).get()
@@ -25,6 +53,21 @@ router.get('/battery/:id', (req, res) => {
 })
 
 // GET all batteries
+/**
+ * @swagger
+ *
+ * /batteries:
+ *   get:
+ *     tags: [Batteries]
+ *     summary: "Get information about all batteries"
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Information on all batteries
+ *         examples:
+ *          application/json: [{ "name": "Cloud Raven", "lastSeen": null, "latestVoltage": 12.3, "createdAt": { "_seconds": 1591739962, "_nanoseconds": 779000000 }, "model": "GF 12 105 V", "notificationsSent": { "first": false, "second": false }, "capacity": 120, "manufacturer": "Sonnenschein", "updatedAt": { "_seconds": 1595000229, "_nanoseconds": 421000000 } } ]
+ */
 router.get('/batteries', (req, res) => {
   docRefBatteries.get()
     .then(snapshot => res.status(200).json(snapshot.docs.map(doc => doc.data())))
@@ -32,6 +75,45 @@ router.get('/batteries', (req, res) => {
 })
 
 // POST to create battery
+/**
+ * @swagger
+ *
+ * /batteries:
+ *   post:
+ *     tags: [Batteries]
+ *     summary: "Create new battery"
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         schema:
+ *            type: object
+ *            required:
+ *              - capacity
+ *              - model
+ *              - name
+ *              - latestVoltage
+ *              - manufacturer
+ *            properties:
+ *              capacity:
+ *                type: number
+ *                format: float
+ *              model:
+ *                type: string
+ *              name:
+ *                type: string
+ *              latestVoltage:
+ *                type: number
+ *                format: float
+ *              manufacturer:
+ *                type: string
+ *     responses:
+ *       200:
+ *         description: Information on all batteries
+ *         examples:
+ *          application/json: [{ "name": "Cloud Raven", "lastSeen": null, "latestVoltage": 12.3, "createdAt": { "_seconds": 1591739962, "_nanoseconds": 779000000 }, "model": "GF 12 105 V", "notificationsSent": { "first": false, "second": false }, "capacity": 120, "manufacturer": "Sonnenschein", "updatedAt": { "_seconds": 1595000229, "_nanoseconds": 421000000 } } ]
+ */
 router.post('/battery', (req, res) => {
   const {
     name,
