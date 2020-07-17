@@ -54,7 +54,8 @@ router.post('/battery', (req, res) => {
       second: false
     },
     createdAt: timestamp,
-    updatedAt: timestamp
+    updatedAt: timestamp,
+    lastSeen: null
   })
   .then(ref => {
     docRefBatteries.doc(ref.id).get()
@@ -85,7 +86,7 @@ router.put('/battery', (req, res) => {
     latestVoltage,
     updatedAt: timestamp
   })
-  .then(ref => {
+  .then(() => {
     docRefBatteries.doc(id).get()
       .then(snapshot => res.status(200).json(snapshot.data()))
       .catch(err => res.status(500).send(`Error getting newly updated battery: ${err}`))
@@ -152,6 +153,17 @@ router.post('/batteriesSlack', (req, res) => {
       res.status(200).json(payload)
     })
     .catch(err => res.status(500).send(`Error getting batteries: ${err}`))
+})
+
+// POST to updated "lastSeen" value of battery
+router.post('/heartbeat', (req, res) => {
+  const { batteryId } = req.body
+
+  docRefBatteries.doc(batteryId).update({
+    lastSeen: admin.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => res.status(200).send())
+  .catch(err => res.status(500).send(`Error handling heartbeat: ${err}`))
 })
 
 /* "Triggers" */
