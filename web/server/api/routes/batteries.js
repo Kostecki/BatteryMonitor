@@ -311,13 +311,13 @@ const postToSlack = (chargeLevel, batteryData, batteryId, newVoltage) => {
       docRefBatteries.doc(batteryId).update({
         notificationsSent: {
           first: true,
-          second: charge === 50 ? false : true
+          second: chargeLevel === 50 ? false : true
         },
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       })
       .catch(err => console.error(`Error updating notification status: ${err}`))
     })
-    .catch(err => console.error(`Error sending notification: ${error}`))
+    .catch(err => console.error(`Error sending notification: ${err}`))
 }
 
 module.exports = router
