@@ -25,7 +25,7 @@ const swaggerSpec = swaggerJSDoc(options)
 // Middlware
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+// app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // Import API Routes
 app.use(batteries)
