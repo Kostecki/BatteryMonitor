@@ -24,6 +24,8 @@ const long heartbeatInterval = HEARTBEAT_FREQUENCY_MINUTES * 60000; // Convert m
 const long logInterval = LOG_INTERVAL_HOURS * 3600000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
 const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert minutes (from FIRST_RUN_THRESHOLD_MINUTES) to milliseconds
 
+// TODO: Custom UserAgent?
+
 void setup(){
   Serial.begin(9600);
 
@@ -36,7 +38,7 @@ void setup(){
   Serial.print("Connecting to WiFi: ");
   Serial.println(WIFI_SSID);
   WiFi.mode(WIFI_STA);
-  WiFi.hostname(HOSTNAME);
+  WiFi.hostname(DEVICE_NAME);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
