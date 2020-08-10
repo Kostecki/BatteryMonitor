@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "BatteryMonitor",
   "version": "1.0.0",
   "description": "My awe-inspiring Nuxt.js project",
   "author": "Jacob Kostecki",
@@ -12,17 +12,21 @@
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore ."
   },
   "dependencies": {
-    "@nuxtjs/axios": "^5.3.6",
+    "@nuxtjs/axios": "^5.12.1",
+    "@nuxtjs/firebase": "^6.1.1",
     "@nuxtjs/pwa": "^3.0.0-0",
     "@nuxtjs/vuetify": "^1.11.2",
     "axios": "^0.19.2",
     "cross-env": "^5.2.0",
     "express": "^4.16.4",
-    "firebase-admin": "^8.12.1",
-    "mongoose": "^5.9.18",
-    "nuxt": "^2.12.2",
+    "firebase": "^7.17.2",
+    "firebase-admin": "^9.0.0",
+    "flatted": "^3.0.4",
+    "mongoose": "^5.9.28",
+    "nuxt": "^2.14.1",
     "swagger-jsdoc": "^4.0.0",
-    "swagger-ui-express": "^4.1.4"
+    "swagger-ui-express": "^4.1.4",
+    "vuexfire": "^3.2.4"
   },
   "devDependencies": {
     "@nuxtjs/dotenv": "^1.4.1",
@@ -31,6 +35,6 @@
     "babel-eslint": "^10.0.1",
     "eslint": "^6.1.0",
     "eslint-plugin-nuxt": ">=0.4.2",
-    "nodemon": "^1.18.9"
+    "nodemon": "^2.0.4"
   }
 }

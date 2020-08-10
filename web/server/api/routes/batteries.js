@@ -1,19 +1,12 @@
 import { Router } from 'express'
 import axios from 'axios'
-const admin = require('firebase-admin');
 const router = Router()
 
+import firebase from '../../../firebase/firebaseAdmin'
 import { calcBatteryCharge } from '../../../utils/helperFunctions'
 
-const serviceAccount = require('../../../secrets/serviceAccountKey.json')
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://batterymonitor-2b1c4.firebaseio.com"
-});
-
-const db = admin.firestore()
-const docRefBatteries = db.collection('batteries')
-const docRefMeasurements = db.collection('measurements')
+const docRefBatteries = firebase.collection('batteries')
+const docRefMeasurements = firebase.collection('measurements')
 
 /**
  * @Swagger
@@ -178,7 +171,6 @@ router.put('/battery', (req, res) => {
 
 // DELETE to delete battery
 router.delete('/battery/:id', (req, res) => {
-  console.log('delete')
   const id = req.params.id
 
   docRefBatteries.doc(id).delete()
