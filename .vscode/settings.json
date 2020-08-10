@@ -1,0 +1,16 @@
+{
+  "files.associations": {
+    "bitset": "cpp",
+    "__tuple": "cpp",
+    "array": "cpp",
+    "__functional_base": "cpp",
+    "future": "cpp",
+    "istream": "cpp",
+    "locale": "cpp",
+    "memory": "cpp",
+    "thread": "cpp",
+    "tuple": "cpp",
+    "utility": "cpp",
+    "variant": "cpp"
+  }
+}
