@@ -1,7 +1,17 @@
 <template>
   <v-row>
     <v-col
+      v-if="loading"
+      align="center"
+    >
+      <v-progress-circular
+        indeterminate
+        color="primary"
+      />
+    </v-col>
+    <v-col
       v-for="battery in sortedBatteries"
+      v-else
       :key="battery.name"
       cols="12"
       sm="8"
@@ -14,7 +24,7 @@
       xl="3"
       align="center"
     >
-      <v-card class="px-4">
+      <v-card class="px-4" @click="cardClick(battery)">
         <v-row align="center" no-gutters>
           <v-col cols="3" class="d-flex justify-center battery-percentage" :style="{color: setChargeColor(battery.latestVoltage) }">
             <h1>
@@ -35,15 +45,41 @@
         </v-row>
       </v-card>
     </v-col>
+    <v-col
+      v-if="!loading"
+      cols="12"
+      sm="8"
+      offset-sm="2"
+      offset-md="0"
+      md="6"
+      lg="5"
+      offset-lg="1"
+      offset-xl="0"
+      xl="3"
+      align="center"
+    >
+      <v-card class="px-4 add-new-card" @click="cardClick">
+        <v-icon>mdi-plus-circle-outline</v-icon>
+      </v-card>
+    </v-col>
+    <batteryModal v-if="!loading" />
   </v-row>
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapMutations } from 'vuex'
 import utils from '../utils/helperFunctions'
+import batteryModal from './batteryModal'
 
 export default {
-  components: {},
+  components: {
+    batteryModal
+  },
+  data () {
+    return {
+      loading: true
+    }
+  },
   computed: {
     ...mapState('modules/firebase', ['batteries']),
     sortedBatteries () {
@@ -52,12 +88,19 @@ export default {
   },
   created () {
     return this.bindBatteries()
+      .then(resp => (this.loading = false))
+      .catch((err) => {
+        this.loading = false
+        // eslint-disable-next-line
+        console.error(err)
+      })
   },
   beforeDestroy () {
     this.unbindBatteries()
   },
   methods: {
     ...mapActions('modules/firebase', ['bindBatteries', 'unbindBatteries']),
+    ...mapMutations('modules/batteries', ['toggleBatteryModal', 'selectBattery']),
     calcBatteryCharge: utils.calcBatteryCharge,
     setChargeColor: utils.setChargeColor,
     setNotificationStatus (battery, position) {
@@ -65,6 +108,14 @@ export default {
         return 'first-notification-sent'
       } else if (position === 'second' && battery.notificationsSent.second) {
         return 'second-notification-sent'
+      }
+    },
+    cardClick (battery) {
+      if (battery.id) {
+        this.selectBattery(battery)
+        this.toggleBatteryModal('edit')
+      } else {
+        this.toggleBatteryModal('add')
       }
     }
   },
@@ -79,6 +130,18 @@ export default {
 <style>
   .card-main-content {
     text-align: left;
+  }
+
+  .add-new-card {
+    min-height: 108px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.3;
+  }
+
+  .add-new-card:hover {
+    opacity: 0.5;
   }
 
   .border-notification {
