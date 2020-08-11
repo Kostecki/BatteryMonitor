@@ -21,7 +21,6 @@
     "express": "^4.16.4",
     "firebase": "^7.17.2",
     "firebase-admin": "^9.0.0",
-    "flatted": "^3.0.4",
     "mongoose": "^5.9.28",
     "nuxt": "^2.14.1",
     "swagger-jsdoc": "^4.0.0",
