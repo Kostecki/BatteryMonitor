@@ -44,23 +44,20 @@ import utils from '../utils/helperFunctions'
 
 export default {
   components: {},
-  fetch () {
-    return this.bindBatteries()
-  },
-  data () {
-    return {}
-  },
   computed: {
-    ...mapState(['allBatteries']),
+    ...mapState('modules/firebase', ['batteries']),
     sortedBatteries () {
-      return [...this.allBatteries].sort((a, b) => a.latestVoltage - b.latestVoltage)
+      return [...this.batteries].sort((a, b) => a.latestVoltage - b.latestVoltage)
     }
+  },
+  created () {
+    return this.bindBatteries()
   },
   beforeDestroy () {
     this.unbindBatteries()
   },
   methods: {
-    ...mapActions(['bindBatteries', 'unbindBatteries']),
+    ...mapActions('modules/firebase', ['bindBatteries', 'unbindBatteries']),
     calcBatteryCharge: utils.calcBatteryCharge,
     setChargeColor: utils.setChargeColor,
     setNotificationStatus (battery, position) {
