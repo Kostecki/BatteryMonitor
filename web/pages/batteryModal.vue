@@ -41,6 +41,7 @@
           v-model.number="modalValues.latestVoltage.value"
           label="Latest Voltage"
           type="number"
+          step="0.1"
           suffix="Volt"
           required
         />

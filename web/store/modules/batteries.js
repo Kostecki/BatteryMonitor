@@ -4,7 +4,8 @@ export const state = () => ({
     mode: null,
     title: null
   },
-  selectedBattery: null
+  selectedBattery: null,
+  measurementModalVisible: false
 })
 
 export const mutations = {
@@ -33,6 +34,9 @@ export const mutations = {
   },
   deselectBattery (state) {
     state.selectedBattery = null
+  },
+  toggleMeasurementModal (state) {
+    state.measurementModalVisible = !state.measurementModalVisible
   }
 }
 
