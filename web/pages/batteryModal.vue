@@ -150,9 +150,9 @@ export default {
 
 <style>
   .headline {
-    display: flex;
+    display: flex !important;
+    align-items: flex-start !important;
     flex-direction: column;
-    align-items: flex-start;
   }
 
   .battery-id {
