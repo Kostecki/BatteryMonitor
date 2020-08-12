@@ -7,6 +7,7 @@
           grow
           fixed
           color="orange"
+          height="70"
         >
           <v-btn v-if="loggedIn" @click="newBattery">
             <span>New Battery</span>
