@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="headline">
         <div>{{ modalState.title }}</div>
-        <div v-if="selectedBattery" class="battery-id">ID: {{ selectedBattery.id }}</div>
+        <div v-if="selectedBattery && selectedBattery.id" class="battery-id">ID: {{ selectedBattery.id }}</div>
       </v-card-title>
       <v-form
         ref="form"
