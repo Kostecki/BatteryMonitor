@@ -3,17 +3,17 @@ import 'firebase/firestore'
 import 'firebase/auth'
 
 const config = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.FIREBASE_DB_URL,
-  projectId: process.env.FIREBASE_PROJECT_ID
+  apiKey: process.env.FIREBASE_API_KEY.toString(),
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN.toString(),
+  databaseURL: process.env.FIREBASE_DB_URL.toString(),
+  projectId: process.env.FIREBASE_PROJECT_ID.toString()
 }
 
 console.log('this is index.js')
-console.log(process.env.FIREBASE_API_KEY)
-console.log(process.env.FIREBASE_AUTH_DOMAIN)
-console.log(process.env.FIREBASE_DB_URL)
-console.log(process.env.FIREBASE_PROJECT_ID)
+console.log(process.env.FIREBASE_API_KEY.toString())
+console.log(process.env.FIREBASE_AUTH_DOMAIN.toString())
+console.log(process.env.FIREBASE_DB_URL.toString())
+console.log(process.env.FIREBASE_PROJECT_ID.toString())
 
 export const db = !firebase.apps.length
   ? firebase.initializeApp(config).firestore()
