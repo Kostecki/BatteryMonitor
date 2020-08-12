@@ -208,4 +208,8 @@ export default {
   .second-notification-sent {
     background: rgba(244, 67, 54, 1);
   }
+  
+  .v-bottom-navigation button {
+    height: 100% !important;
+  }
 </style>
