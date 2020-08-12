@@ -2,7 +2,8 @@ import { firestoreAction } from 'vuexfire'
 import { db } from '../../firebase'
 
 export const state = () => ({
-  batteries: []
+  batteries: [],
+  measurements: []
 })
 
 export const actions = {
@@ -11,5 +12,11 @@ export const actions = {
   }),
   unbindBatteries: firestoreAction(({ unbindFirestoreRef }) => {
     unbindFirestoreRef('batteries')
+  }),
+  bindMeasurements: firestoreAction(({ bindFirestoreRef }) => {
+    return bindFirestoreRef('measurements', db.collection('measurements'))
+  }),
+  unbindMeasurements: firestoreAction(({ unbindFirestoreRef }) => {
+    unbindFirestoreRef('measurements')
   })
 }

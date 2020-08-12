@@ -72,8 +72,8 @@
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import utils from '../utils/helperFunctions'
-import batteryModal from './batteryModal'
-import measurementModal from './measurementModal'
+import batteryModal from '../components/batteryModal'
+import measurementModal from '../components/measurementModal'
 
 export default {
   components: {
@@ -96,7 +96,7 @@ export default {
     // Extend dayjs
     this.$dayjs.extend(advancedFormat)
 
-    return this.bindBatteries()
+    this.bindBatteries()
       .then(resp => (this.loading = false))
       .catch((err) => {
         this.loading = false
@@ -108,7 +108,7 @@ export default {
     this.unbindBatteries()
   },
   methods: {
-    ...mapActions('modules/firebase', ['bindBatteries', 'unbindBatteries']),
+    ...mapActions('modules/firebase', ['bindBatteries', 'unbindBatteries', 'bindMeasurements', 'unbindMeasurements']),
     ...mapMutations('modules/batteries', ['toggleBatteryModal', 'selectBattery']),
     calcBatteryCharge: utils.calcBatteryCharge,
     setChargeColor: utils.setChargeColor,
