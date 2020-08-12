@@ -1,6 +1,8 @@
 import { vuexfireMutations } from 'vuexfire'
 
-export const state = () => ({})
+export const state = () => ({
+  loggedIn: true
+})
 
 export const mutations = {
   ...vuexfireMutations

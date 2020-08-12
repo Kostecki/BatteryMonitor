@@ -20,7 +20,7 @@
           dense
           class="batteries-select"
           required
-        ></v-select>
+        />
         <v-text-field
           v-model.number="modalValues.voltage.value"
           label="Voltage"

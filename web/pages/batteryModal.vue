@@ -1,10 +1,9 @@
 <template>
   <v-dialog v-model="batteryModalVisible" persistent max-width="380">
     <v-card>
-      <v-card-title
-        class="headline"
-      >
-        {{ modalState.title }}
+      <v-card-title class="headline">
+        <div>{{ modalState.title }}</div>
+        <div v-if="selectedBattery" class="battery-id">ID: {{ selectedBattery.id }}</div>
       </v-card-title>
       <v-form
         ref="form"
@@ -150,4 +149,16 @@ export default {
 </script>
 
 <style>
+  .headline {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .battery-id {
+    color: rgba(128, 128, 128, 0.6);
+    font-size: 14px;
+    margin-top: -7px;
+    font-style: italic;
+  }
 </style>

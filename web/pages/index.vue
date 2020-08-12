@@ -9,7 +9,7 @@
         color="primary"
       />
     </v-col>
-    <div class="wrap d-flex flex-wrap" v-else>
+    <div v-else class="wrap d-flex flex-wrap">
       <!-- <v-col cols="12">
         <v-toolbar dense>
           <v-btn icon>
@@ -33,13 +33,17 @@
         lg="5"
         xl="3"
         align="center"
-        class="single-battery-card"
+        :class="loggedIn ? 'single-battery-card' : null"
       >
-        <v-card class="px-4" @click="cardClick(battery)">
+        <v-card class="px-4" v-on="loggedIn ? {click: () => cardClick(battery) } : null">
           <v-row align="center" no-gutters>
             <v-col cols="3" class="d-flex flex-column justify-center" :style="{color: setChargeColor(battery.latestVoltage) }">
-              <div class="battery-charge">{{ calcBatteryCharge(battery.latestVoltage) }}%</div>
-              <div class="latest-voltage">{{ battery.latestVoltage.toFixed(2) }} V</div>
+              <div class="battery-charge">
+                {{ calcBatteryCharge(battery.latestVoltage) }}%
+              </div>
+              <div class="latest-voltage">
+                {{ battery.latestVoltage.toFixed(2) }} V
+              </div>
             </v-col>
             <v-col cols="9" class="card-main-content">
               <v-card-title>
@@ -82,6 +86,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['loggedIn']),
     ...mapState('modules/firebase', ['batteries']),
     sortedBatteries () {
       return [...this.batteries].sort((a, b) => a.latestVoltage - b.latestVoltage)
@@ -144,6 +149,9 @@ export default {
     }
   }
 
+  .single-battery-card {
+    user-select: none;
+  }
   .single-battery-card:hover {
     opacity: 0.8;
   }
@@ -208,7 +216,7 @@ export default {
   .second-notification-sent {
     background: rgba(244, 67, 54, 1);
   }
-  
+
   .v-bottom-navigation button {
     height: 100% !important;
   }
