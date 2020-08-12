@@ -80,6 +80,6 @@ export default {
 <style>
   .v-bottom-navigation button,
   .v-bottom-navigation a {
-    height: 100%;
+    height: 100% !important;
   }
 </style>

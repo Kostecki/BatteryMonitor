@@ -55,6 +55,9 @@ export default {
       ]
     }
   },
+  computed: {
+    ...mapState('modules/firebase', ['batteries', 'measurements'])
+  },
   created () {
     // Extend dayjs
     this.$dayjs.extend(advancedFormat)
@@ -74,9 +77,6 @@ export default {
         // eslint-disable-next-line
         console.error(err)
       })
-  },
-  computed: {
-    ...mapState('modules/firebase', ['batteries', 'measurements'])
   },
   beforeDestroy () {
     this.unbindMeasurements()
