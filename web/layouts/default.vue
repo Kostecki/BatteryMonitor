@@ -76,3 +76,10 @@ export default {
   }
 }
 </script>
+
+<style>
+  .v-bottom-navigation button,
+  .v-bottom-navigation a {
+    height: 100%;
+  }
+</style>
