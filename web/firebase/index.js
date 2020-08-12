@@ -10,7 +10,7 @@ const config = {
 }
 
 console.log('this is index.js')
-console.log(projectId)
+console.log(process.env.FIREBASE_PROJECT_ID)
 
 export const db = !firebase.apps.length
   ? firebase.initializeApp(config).firestore()
