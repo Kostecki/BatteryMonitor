@@ -10,11 +10,15 @@
     dense
     class="measurements-table elevation-1"
   >
-    <template v-slot:[`item.name`]="{ item }">
-      <span :class="idToName(item.batteryId) === 'Battery not found' ? 'not-found' : null">{{ idToName(item.batteryId) }}</span>
+    <template v-slot:[`item.batteryId`]="{ item }">
+      <span>{{ idToName(item.batteryId) ? idToName(item.batteryId) : item.batteryId }}</span>
+      <span class="batt-id-has-name">{{ idToName(item.batteryId) ? `(${item.batteryId})` : null }}</span>
+    </template>
+    <template v-slot:[`item.voltage`]="{ item }">
+      <span>{{ item.voltage.toFixed(2) }}</span>
     </template>
     <template v-slot:[`item.createdAt`]="{ item }">
-      <span>{{ $dayjs(item.createdAt.seconds * 1000).format('MMMM Do, YYYY - HH:mm') }}</span>
+      <span>{{ $dayjs(item.createdAt.seconds * 1000).format('MMMM Do, YYYY HH:mm') }}</span>
     </template>
   </v-data-table>
 </template>
@@ -29,16 +33,10 @@ export default {
       loading: true,
       headers: [
         {
-          text: 'Battery ID',
+          text: 'Battery',
           align: 'start',
           sortable: true,
           value: 'batteryId'
-        },
-        {
-          text: 'Battery Name',
-          align: 'start',
-          sortable: true,
-          value: 'name'
         },
         {
           text: 'Voltage',
@@ -86,7 +84,7 @@ export default {
     ...mapActions('modules/firebase', ['bindBatteries', 'unbindBatteries']),
     idToName (batteryId) {
       const battery = this.batteries.find(e => e.id === batteryId)
-      return battery ? battery.name : 'Battery not found'
+      return battery ? battery.name : null
     }
   }
 }
@@ -97,7 +95,8 @@ export default {
     margin-bottom: 100px;
   }
 
-  .not-found {
+  .batt-id-has-name {
     font-style: italic;
+    opacity: 0.5;
   }
 </style>
