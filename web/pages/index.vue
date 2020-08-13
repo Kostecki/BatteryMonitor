@@ -51,7 +51,6 @@
               </v-card-title>
               <v-card-subtitle>
                 <div>{{ `${battery.manufacturer}, ${battery.model}` }}</div>
-                <!-- <div>Charge: {{ battery.latestVoltage }} Volt</div> -->
                 <div class="last-seen">
                   Updated: {{ formatTime(battery.updatedAt) }}
                 </div>
@@ -59,6 +58,14 @@
             </v-col>
             <div class="border-notification notification-first" :class="setNotificationStatus(battery, 'first')" />
             <div class="border-notification notification-second" :class="setNotificationStatus(battery, 'second')" />
+            <v-progress-linear
+              absolute
+              bottom
+              height="4"
+              color="rgb(150, 150, 150)"
+              :value="calcBatteryCharge(battery.latestVoltage)"
+              class="progress"
+            />
           </v-row>
         </v-card>
       </v-col>
@@ -219,5 +226,10 @@ export default {
 
   .v-bottom-navigation button {
     height: 100% !important;
+  }
+
+  .progress {
+    width: calc(100% - 8px);
+    border-bottom-left-radius: 4px;
   }
 </style>
