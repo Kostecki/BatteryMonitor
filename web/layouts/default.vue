@@ -14,21 +14,25 @@
             <span>Batteries</span>
             <v-icon>mdi-battery-high</v-icon>
           </v-btn>
+          <v-divider vertical />
 
-          <v-btn v-if="loggedIn" @click="newBattery">
+          <v-btn v-if="loggedIn && this.$nuxt.$route.name === 'index'" @click="newBattery">
             <span>New Battery</span>
             <v-icon>mdi-battery-positive</v-icon>
           </v-btn>
+          <v-divider v-if="loggedIn && this.$nuxt.$route.name === 'index'" vertical />
 
-          <v-btn v-if="loggedIn" @click="toggleMeasurementModal">
+          <v-btn v-if="loggedIn && this.$nuxt.$route.name === 'measurements'" @click="toggleMeasurementModal">
             <span>New Measurement</span>
             <v-icon>mdi-chart-box-plus-outline</v-icon>
           </v-btn>
+          <v-divider v-if="loggedIn && this.$nuxt.$route.name === 'measurements'" vertical />
 
           <v-btn to="/measurements">
             <span>Measurements</span>
             <v-icon>mdi-chart-box-outline</v-icon>
           </v-btn>
+          <v-divider v-if="!loggedIn" vertical />
 
           <v-btn v-if="!loggedIn">
             <span>Log in</span>
