@@ -70,6 +70,8 @@
         </v-card>
       </v-col>
     </div>
+
+    <!-- Modals -->
     <batteryModal />
     <measurementModal />
   </v-row>
@@ -229,7 +231,7 @@ export default {
   }
 
   .progress {
-    width: calc(100% - 8px);
+    width: calc(100% - 8px) !important;
     border-bottom-left-radius: 4px;
   }
 </style>

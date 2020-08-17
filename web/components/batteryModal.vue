@@ -51,6 +51,15 @@
         />
       </v-form>
       <v-card-actions>
+        <v-btn
+          v-if="selectedBattery && selectedBattery.id"
+          color="red darken-1"
+          text
+          @click="deleteBattery"
+          class="ml-2"
+        >
+          Delete
+        </v-btn>
         <v-spacer />
         <v-btn
           color="red darken-1"
@@ -118,6 +127,7 @@ export default {
   },
   methods: {
     ...mapMutations('modules/batteries', ['toggleBatteryModal', 'deselectBattery']),
+    ...mapMutations('modules/statusAlert', ['toggleAlert']),
     dismissDialog () {
       this.$refs.form.reset()
       this.deselectBattery()
@@ -129,16 +139,35 @@ export default {
         payload[key] = this.modalValues[key].value
       })
 
-      // eslint-disable-next-line
-      console.log(payload)
-
       switch (this.modalState.mode) {
         case 'add':
-          // POST new payload
+          this.$axios.$post('/api/battery', payload)
+            .then(() => this.toggleAlert({
+              showAlert: true,
+              alertType: 'success',
+              alertMessage: 'New battery successfully created'
+            }))
+            .catch(err => this.toggleAlert({
+              showAlert: true,
+              alertType: 'error',
+              alertMessage: `Something went wrong creating battery: ${err}`
+            }))
           break
 
         case 'edit':
-          // PUT edited payload
+          // Add battery id to payload to edit the right battery
+          payload.id = this.selectedBattery.id
+          this.$axios.$put('/api/battery', payload)
+            .then(() => this.toggleAlert({
+              showAlert: true,
+              alertType: 'success',
+              alertMessage: 'Battery successfully updated'
+            }))
+            .catch(err => this.toggleAlert({
+              showAlert: true,
+              alertType: 'error',
+              alertMessage: `Something went wrong updating battery: ${err}`
+            }))
           break
 
         default:
@@ -148,6 +177,37 @@ export default {
       this.$refs.form.reset()
       this.deselectBattery()
       this.toggleBatteryModal()
+    },
+    deleteBattery () {
+      this.$swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.value) {
+          this.$axios.$delete(`/api/battery/${this.selectedBattery.id}`)
+            .then(() => {
+              this.toggleAlert({
+                showAlert: true,
+                alertType: 'success',
+                alertMessage: 'Battery successfully deleted'
+              })
+
+              this.$refs.form.reset()
+              this.deselectBattery()
+              this.toggleBatteryModal()
+            })
+            .catch(err => this.toggleAlert({
+              showAlert: true,
+              alertType: 'error',
+              alertMessage: `Something went wrong deleting battery: ${err}`
+            }))
+        }
+      })
     }
   }
 }

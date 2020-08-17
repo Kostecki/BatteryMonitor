@@ -1,6 +1,9 @@
 <template>
   <v-app id="main" :style="{background: $vuetify.theme.themes['light'].background}">
     <v-main>
+      <!-- Status Alert -->
+      <statusAlert />
+
       <v-container>
         <nuxt />
         <v-bottom-navigation
@@ -46,8 +49,12 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex'
+import statusAlert from '../components/statusAlert'
 
 export default {
+  components: {
+    statusAlert
+  },
   data () {
     return {
       activeTab: 0
@@ -85,5 +92,9 @@ export default {
   .v-bottom-navigation button,
   .v-bottom-navigation a {
     height: 100% !important;
+  }
+
+  .swal2-modal {
+    font-family: 'Roboto' !important;
   }
 </style>

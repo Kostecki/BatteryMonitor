@@ -54,7 +54,8 @@ module.exports = {
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
     '@nuxtjs/pwa',
-    '@nuxtjs/dayjs'
+    '@nuxtjs/dayjs',
+    'nuxt-sweetalert2'
   ],
   /*
   ** Axios module configuration

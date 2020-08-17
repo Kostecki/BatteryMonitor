@@ -2,6 +2,7 @@ import { Router } from 'express'
 import axios from 'axios'
 const router = Router()
 
+const admin = require('firebase-admin')
 import firebase from '../../../firebase/firebaseAdmin'
 import { calcBatteryCharge } from '../../../utils/helperFunctions'
 
