@@ -178,10 +178,7 @@ export default {
         default:
           break
       }
-
-      this.$refs.form.reset()
-      this.deselectBattery()
-      this.toggleBatteryModal()
+      this.dismissDialog()
     },
     deleteBattery () {
       this.$swal.fire({
@@ -202,9 +199,7 @@ export default {
                 alertMessage: 'Battery successfully deleted'
               })
 
-              this.$refs.form.reset()
-              this.deselectBattery()
-              this.toggleBatteryModal()
+              this.dismissDialog()
             })
             .catch(err => this.toggleAlert({
               showAlert: true,
