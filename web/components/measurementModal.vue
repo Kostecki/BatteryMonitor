@@ -1,5 +1,10 @@
 <template>
-  <v-dialog v-model="measurementModalVisible" persistent max-width="380">
+  <v-dialog
+    v-model="measurementModalVisible"
+    :retain-focus="false"
+    persistent
+    max-width="380"
+  >
     <v-card>
       <v-card-title
         class="headline"
@@ -72,12 +77,12 @@ export default {
     }
   },
   computed: {
-    ...mapState('modules/batteries', ['measurementModalVisible']),
+    ...mapState('modules/measurements', ['measurementModalVisible']),
     ...mapState('modules/firebase', ['batteries'])
-
   },
   methods: {
-    ...mapMutations('modules/batteries', ['toggleMeasurementModal']),
+    ...mapMutations('modules/measurements', ['toggleMeasurementModal']),
+    ...mapMutations('modules/statusAlert', ['toggleAlert']),
     dismissDialog () {
       this.$refs.form.reset()
       this.toggleMeasurementModal()
@@ -88,10 +93,18 @@ export default {
         payload[key] = this.modalValues[key].value
       })
 
-      // eslint-disable-next-line
-      console.log(payload)
-
       // POST new measurement
+      this.$axios.$post('/api/measurement', payload)
+        .then(() => this.toggleAlert({
+          showAlert: true,
+          alertType: 'success',
+          alertMessage: 'Measurement successfully added'
+        }))
+        .catch(err => this.toggleAlert({
+          showAlert: true,
+          alertType: 'error',
+          alertMessage: `Something went wrong creating measurement: ${err}`
+        }))
 
       this.$refs.form.reset()
       this.toggleMeasurementModal()

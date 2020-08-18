@@ -19,7 +19,7 @@
           </v-btn>
           <v-divider vertical />
 
-          <v-btn v-if="loggedIn && this.$nuxt.$route.name === 'index'" @click="newBattery">
+          <v-btn v-if="loggedIn && this.$nuxt.$route.name === 'index'" @click="() => toggleBatteryModal('add')">
             <span>New Battery</span>
             <v-icon>mdi-battery-positive</v-icon>
           </v-btn>
@@ -57,7 +57,7 @@ export default {
   },
   data () {
     return {
-      activeTab: 0
+      activeTab: null
     }
   },
   computed: {
@@ -67,7 +67,8 @@ export default {
     this.setActiveTab()
   },
   methods: {
-    ...mapMutations('modules/batteries', ['toggleBatteryModal', 'toggleMeasurementModal']),
+    ...mapMutations('modules/batteries', ['toggleBatteryModal']),
+    ...mapMutations('modules/measurements', ['toggleMeasurementModal']),
     setActiveTab () {
       switch (this.$nuxt.$route.name) {
         case 'index':
@@ -78,11 +79,9 @@ export default {
           break
 
         default:
+          this.activeTab = null
           break
       }
-    },
-    newBattery () {
-      this.toggleBatteryModal('add')
     }
   }
 }

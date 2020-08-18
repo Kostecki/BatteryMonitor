@@ -71,9 +71,7 @@
       </v-col>
     </div>
 
-    <!-- Modals -->
     <batteryModal />
-    <measurementModal />
   </v-row>
 </template>
 
@@ -82,12 +80,10 @@ import advancedFormat from 'dayjs/plugin/advancedFormat'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import utils from '../utils/helperFunctions'
 import batteryModal from '../components/batteryModal'
-import measurementModal from '../components/measurementModal'
 
 export default {
   components: {
-    batteryModal,
-    measurementModal
+    batteryModal
   },
   data () {
     return {

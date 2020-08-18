@@ -22,7 +22,7 @@ export default {
       if (val) {
         setTimeout(() => {
           this.toggleAlert({ showAlert: false })
-        }, this.alertTimeout || 3000)
+        }, this.alertTimeout)
       }
     }
   },

@@ -1,5 +1,10 @@
 <template>
-  <v-dialog v-model="batteryModalVisible" persistent max-width="380">
+  <v-dialog
+    v-model="batteryModalVisible"
+    :retain-focus="false"
+    persistent
+    max-width="380"
+  >
     <v-card>
       <v-card-title class="headline">
         <div>{{ modalState.title }}</div>
