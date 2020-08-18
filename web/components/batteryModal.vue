@@ -55,8 +55,8 @@
           v-if="selectedBattery && selectedBattery.id"
           color="red darken-1"
           text
-          @click="deleteBattery"
           class="ml-2"
+          @click="deleteBattery"
         >
           Delete
         </v-btn>
