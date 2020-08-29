@@ -181,7 +181,6 @@ router.delete('/battery/:id', (req, res) => {
 
 // POST to create measurement
 router.post('/measurement', (req, res) => {
-  console.log(req.body)
   const { batteryId, voltage } = req.body
 
   docRefMeasurements.add({
@@ -234,6 +233,8 @@ router.post('/batteriesSlack', (req, res) => {
 // POST to updated "lastSeen" value of battery
 router.post('/heartbeat', (req, res) => {
   const { batteryId } = req.body
+
+  console.log(req.body)
 
   docRefBatteries.doc(batteryId).update({
     lastSeen: admin.firestore.FieldValue.serverTimestamp()
