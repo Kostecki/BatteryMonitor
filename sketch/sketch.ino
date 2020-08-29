@@ -16,7 +16,8 @@ bool isFirstRun = true;
 
 // Voltage measurements
 float adc_reading;
-float voltage = 0.0;
+float voltage;
+float voltage_truncated;
 
 // Warning-LED Status
 bool warningLED = false;
@@ -106,6 +107,7 @@ void sendHeartbeat() {
 
   // Handle POST request
   if (https.begin(*client, API_URL_HEARTBEAT)) {
+    https.addHeader("Content-Type", "application/json");
     https.POST(json);
     https.end();
   }
@@ -113,7 +115,7 @@ void sendHeartbeat() {
 
 // Measure voltage of connected battery
 float createMeasurement(bool postToAPI = false) {
-  int samplesCount = 50; // Sample battery voltage 50 times
+  int samplesCount = 200; // Sample battery voltage 50 times
   RunningMedian samples = RunningMedian(samplesCount);
   for (int i = 0; i < samplesCount; i++) {
     adc_reading = ads.readADC_SingleEnded(0) * ADC_RESOLUTION;
@@ -124,15 +126,22 @@ float createMeasurement(bool postToAPI = false) {
   // Get median sampled voltage
   voltage = samples.getMedian();
 
+  // Truncate to 2 decimals
+  // "Multiply your float number by 100. Turn it into an int. to truncate it. Turn it back into a float and divide by 100"
+  voltage_truncated = float(int(voltage * 100)) / 100;
+
+  Serial.print("Voltage: ");
+  Serial.println(voltage_truncated);
+
   // Set status-LED.. status
-  if (voltage < WARNING_VOLTAGE) {
+  if (voltage_truncated < WARNING_VOLTAGE) {
     warningLED = true;
   } else {
     warningLED = false;
   }
   
   if (postToAPI) {
-    sendMeasurement(voltage);
+    sendMeasurement(voltage_truncated);
   }
 }
 
@@ -157,6 +166,7 @@ void sendMeasurement(float measurement) {
 
   // Handle POST request
   if (https.begin(*client, API_URL_MEASUREMENT)) {
+    https.addHeader("Content-Type", "application/json");
     https.POST(json);
     https.end();
   }
