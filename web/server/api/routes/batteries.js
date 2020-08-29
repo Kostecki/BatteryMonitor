@@ -230,13 +230,11 @@ router.post('/batteriesSlack', (req, res) => {
     .catch(err => res.status(500).send(`Error getting batteries: ${err}`))
 })
 
-// POST to updated "lastSeen" value of battery
+// POST to update "lastSeen" value of battery
 router.post('/heartbeat', (req, res) => {
   const { batteryId } = req.body
 
-  console.log(req.body)
-
-  docRefBatteries.doc(batteryId).update({
+  docRefMeasurements.doc(batteryId).update({
     lastSeen: admin.firestore.FieldValue.serverTimestamp()
   })
     .then(() => res.status(200).send())
