@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import axios from 'axios'
+import firebase from '../../../firebase/firebaseAdmin'
+import { calcBatteryCharge } from '../../../utils/helperFunctions'
 const router = Router()
 
 const admin = require('firebase-admin')
-import firebase from '../../../firebase/firebaseAdmin'
-import { calcBatteryCharge } from '../../../utils/helperFunctions'
 
 const docRefBatteries = firebase.collection('batteries')
 const docRefMeasurements = firebase.collection('measurements')
@@ -133,12 +133,12 @@ router.post('/battery', (req, res) => {
     updatedAt: timestamp,
     lastSeen: null
   })
-  .then(ref => {
-    docRefBatteries.doc(ref.id).get()
-      .then(snapshot => res.status(201).json(snapshot.data()))
-      .catch(err => res.status(500).send(`Error getting newly created battery: ${err}`))
-  })
-  .catch(err => res.status(500).send(`Error creating new battery: ${err}`))
+    .then((ref) => {
+      docRefBatteries.doc(ref.id).get()
+        .then(snapshot => res.status(201).json(snapshot.data()))
+        .catch(err => res.status(500).send(`Error getting newly created battery: ${err}`))
+    })
+    .catch(err => res.status(500).send(`Error creating new battery: ${err}`))
 })
 
 // PUT to update battery
@@ -162,12 +162,12 @@ router.put('/battery', (req, res) => {
     latestVoltage,
     updatedAt: timestamp
   })
-  .then(() => {
-    docRefBatteries.doc(id).get()
-      .then(snapshot => res.status(200).json(snapshot.data()))
-      .catch(err => res.status(500).send(`Error getting newly updated battery: ${err}`))
-  })
-  .catch(err => res.status(500).send(`Error updating battery: ${err}`))
+    .then(() => {
+      docRefBatteries.doc(id).get()
+        .then(snapshot => res.status(200).json(snapshot.data()))
+        .catch(err => res.status(500).send(`Error getting newly updated battery: ${err}`))
+    })
+    .catch(err => res.status(500).send(`Error updating battery: ${err}`))
 })
 
 // DELETE to delete battery
@@ -188,16 +188,16 @@ router.post('/measurement', (req, res) => {
     voltage,
     createdAt: admin.firestore.FieldValue.serverTimestamp()
   })
-  .then(ref => {
-    docRefMeasurements.doc(ref.id).get()
-      .then(snapshot => {
-        setLatestVoltage(batteryId, voltage)
-        sendNotification(batteryId, voltage)
-        res.status(201).json(snapshot.data())
-      })
-      .catch(err => res.status(500).send(`Error getting newly created measurement: ${err}`))
-  })
-  .catch(err => res.status(500).send(`Error creating new measurement: ${err}`))
+    .then((ref) => {
+      docRefMeasurements.doc(ref.id).get()
+        .then((snapshot) => {
+          setLatestVoltage(batteryId, voltage)
+          sendNotification(batteryId, voltage)
+          res.status(201).json(snapshot.data())
+        })
+        .catch(err => res.status(500).send(`Error getting newly created measurement: ${err}`))
+    })
+    .catch(err => res.status(500).send(`Error creating new measurement: ${err}`))
 })
 
 // Slack slash-command response with status for all batteries
@@ -205,7 +205,7 @@ router.post('/batteriesSlack', (req, res) => {
   const payload = {
     blocks: [
       {
-        type: "section",
+        type: 'section',
         fields: []
       }
     ]
@@ -214,17 +214,17 @@ router.post('/batteriesSlack', (req, res) => {
   const batteryList = []
 
   docRefBatteries.get()
-    .then(snapshot => {
+    .then((snapshot) => {
       snapshot.forEach(battery => batteryList.push(battery.data()))
       batteryList.sort((a, b) => a.latestVoltage - b.latestVoltage).reverse() // Sort by Latest Voltage (largest first)
 
-      batteryList.forEach(battery => {
+      batteryList.forEach((battery) => {
         payload.blocks[0].fields.push({
           type: 'mrkdwn',
           text: `*${battery.name} (_${calcBatteryCharge(battery.latestVoltage)}%, ${battery.latestVoltage} Volt_)* \n _${battery.manufacturer}, ${battery.model} (${battery.capacity} Ah)_`
         })
       })
-      
+
       res.status(200).json(payload)
     })
     .catch(err => res.status(500).send(`Error getting batteries: ${err}`))
@@ -237,8 +237,8 @@ router.post('/heartbeat', (req, res) => {
   docRefBatteries.doc(batteryId).update({
     lastSeen: admin.firestore.FieldValue.serverTimestamp()
   })
-  .then(() => res.status(200).send())
-  .catch(err => res.status(500).send(`Error handling heartbeat: ${err}`))
+    .then(() => res.status(200).send())
+    .catch(err => res.status(500).send(`Error handling heartbeat: ${err}`))
 })
 
 /* "Triggers" */
@@ -250,10 +250,10 @@ const setLatestVoltage = (batteryId, newVoltage) => {
     .catch(err => console.error(err))
 }
 
-// Determine if a notification should be sent 
+// Determine if a notification should be sent
 const sendNotification = (batteryId, newVoltage) => {
   docRefBatteries.doc(batteryId).get()
-    .then(snapshot => {
+    .then((snapshot) => {
       const battery = snapshot.data()
       if (newVoltage > 12.5) {
         docRefBatteries.doc(batteryId).update({
@@ -263,7 +263,7 @@ const sendNotification = (batteryId, newVoltage) => {
           },
           updatedAt: admin.firestore.FieldValue.serverTimestamp()
         })
-        .catch(() => res.status(500).send(`Error updating notificationsSent: ${err}`))
+          .catch(err => console.error(`Error updating notificationsSent: ${err}`))
       }
 
       // Battery is at about 50%, but above 20%: send first notfication
@@ -289,9 +289,9 @@ const postToSlack = (chargeLevel, batteryData, batteryId, newVoltage) => {
         color: `${chargeLevel === 50 ? '#F2C744' : '#F44336'}`,
         blocks: [
           {
-            type: "section",
+            type: 'section',
             text: {
-              type: "mrkdwn",
+              type: 'mrkdwn',
               text: `*${batteryData.name}* is at *${chargeLevel}%* charge (${batteryData.latestVoltage} Volt) \n _${batteryData.manufacturer}, ${batteryData.model} (${batteryData.capacity} Ah)_`
             }
           }
@@ -304,11 +304,11 @@ const postToSlack = (chargeLevel, batteryData, batteryId, newVoltage) => {
       docRefBatteries.doc(batteryId).update({
         notificationsSent: {
           first: true,
-          second: chargeLevel === 50 ? false : true
+          second: chargeLevel !== 50
         },
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       })
-      .catch(err => console.error(`Error updating notification status: ${err}`))
+        .catch(err => console.error(`Error updating notification status: ${err}`))
     })
     .catch(err => console.error(`Error sending notification: ${err}`))
 }
