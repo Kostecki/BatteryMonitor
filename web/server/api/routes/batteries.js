@@ -181,6 +181,7 @@ router.delete('/battery/:id', (req, res) => {
 
 // POST to create measurement
 router.post('/measurement', (req, res) => {
+  console.log(req.body)
   const { batteryId, voltage } = req.body
 
   docRefMeasurements.add({
