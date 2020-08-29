@@ -28,12 +28,15 @@ const long heartbeatInterval = HEARTBEAT_FREQUENCY_MINUTES * 60000; // Convert m
 const long logInterval = LOG_INTERVAL_HOURS * 3600000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
 const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert minutes (from FIRST_RUN_THRESHOLD_MINUTES) to milliseconds
 
+// WiFi jank
+int wifiFailCount = 0;
+
 // TODO: Custom UserAgent?
 
 void setup(){
   Serial.begin(9600);
 
-  delay(1000) // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
+  delay(1000); // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
 
   // Setup pins: Voltage IN + LED
   pinMode(VOLTAGE_INPUT_PIN, INPUT);
@@ -49,6 +52,12 @@ void setup(){
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
+    wifiFailCount = wifiFailCount + 1;
+
+    // Restart ESP if WiFi can't connect
+    if (wifiFailCount >= 100) { // Arbitrary "it has probably failed by now"-count
+      ESP.restart();
+    }
   }
   Serial.println();
   Serial.print("Conncted, IP address: ");
@@ -72,6 +81,10 @@ void setup(){
   // Setup ADS
   ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
   ads.begin();
+
+  // Setup deep sleep
+  // Serial.println("Maybe it's sleeping for 30 seconds?");
+  // ESP.deepSleep(30e6);
 }
 
 void sendHeartbeat() {
