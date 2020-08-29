@@ -234,7 +234,7 @@ router.post('/batteriesSlack', (req, res) => {
 router.post('/heartbeat', (req, res) => {
   const { batteryId } = req.body
 
-  docRefMeasurements.doc(batteryId).update({
+  docRefBatteries.doc(batteryId).update({
     lastSeen: admin.firestore.FieldValue.serverTimestamp()
   })
     .then(() => res.status(200).send())
