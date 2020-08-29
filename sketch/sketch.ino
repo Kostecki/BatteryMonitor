@@ -6,12 +6,16 @@
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include <RunningMedian.h>
+#include <Adafruit_ADS1015.h>
+
+// Setup ADS1015 ADC
+Adafruit_ADS1015 ads;
 
 // Keep track of first run
 bool isFirstRun = true;
 
 // Voltage measurements
-int raw_analog_value = 0;
+float adc_reading;
 float voltage = 0.0;
 
 // Warning-LED Status
@@ -28,6 +32,8 @@ const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert m
 
 void setup(){
   Serial.begin(9600);
+
+  delay(1000) // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
 
   // Setup pins: Voltage IN + LED
   pinMode(VOLTAGE_INPUT_PIN, INPUT);
@@ -62,6 +68,10 @@ void setup(){
   ArduinoOTA.setHostname(OTA_NAME);
   ArduinoOTA.setPassword(OTA_PASSWORD);
   ArduinoOTA.begin();
+
+  // Setup ADS
+  ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
+  ads.begin();
 }
 
 void sendHeartbeat() {
@@ -90,11 +100,11 @@ void sendHeartbeat() {
 
 // Measure voltage of connected battery
 float createMeasurement(bool postToAPI = false) {
-  // Sample battery voltage 1000 times
-  RunningMedian samples = RunningMedian(1000);
-  for (int i = 0; i < 1000; i++) {
-    raw_analog_value = analogRead(VOLTAGE_INPUT_PIN);
-    samples.add(raw_analog_value * 0.01248);
+  int samplesCount = 50; // Sample battery voltage 50 times
+  RunningMedian samples = RunningMedian(samplesCount);
+  for (int i = 0; i < samplesCount; i++) {
+    adc_reading = ads.readADC_SingleEnded(0) * ADC_RESOLUTION;
+    samples.add(adc_reading * VOLTAGE_DIVIDER_RATIO);
     delay(50);
   }
 
