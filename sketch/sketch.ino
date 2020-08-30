@@ -32,6 +32,9 @@ const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert m
 // WiFi jank
 int wifiFailCount = 0;
 
+// Sleep tracking
+bool shouldSleep = false;
+
 // TODO: Custom UserAgent?
 
 void setup(){
@@ -39,8 +42,7 @@ void setup(){
 
   delay(1000); // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
 
-  // Setup pins: Voltage IN + LED
-  pinMode(VOLTAGE_INPUT_PIN, INPUT);
+  // Setup pins
   pinMode(LED_PIN, OUTPUT);
 
   // Setup WiFi with Mode, Hostname, SSID and Password
@@ -56,7 +58,7 @@ void setup(){
     wifiFailCount = wifiFailCount + 1;
 
     // Restart ESP if WiFi can't connect
-    if (wifiFailCount >= 100) { // Arbitrary "it has probably failed by now"-count
+    if (wifiFailCount >= 50) { // Arbitrary "it has probably failed by now"-count
       ESP.restart();
     }
   }
@@ -80,12 +82,21 @@ void setup(){
   ArduinoOTA.begin();
 
   // Setup ADS
+  // NOTE: Disconnt connection between RST and D0 when programming
   ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
   ads.begin();
 
   // Setup deep sleep
-  // Serial.println("Maybe it's sleeping for 30 seconds?");
-  // ESP.deepSleep(30e6);
+  float sleepTimeInMS = DEEP_SLEEP_DURATION_HOURS * 60 * 60 * 1000 * 1000; // Converting from hours (DEEP_SLEEP_DURATION_HOURS) to microseconds
+  Serial.print("Sleeping for ");
+  Serial.print(int(DEEP_SLEEP_DURATION_HOURS));
+  Serial.println(" hour intervals");
+  
+  // Only sleep after a measurement
+  if (shouldSleep) {
+    ESP.deepSleep(sleepTimeInMS);
+    shouldSleep = false;
+  }
 }
 
 void sendHeartbeat() {
@@ -110,6 +121,8 @@ void sendHeartbeat() {
     https.addHeader("Content-Type", "application/json");
     https.POST(json);
     https.end();
+
+    shouldSleep = true;
   }
 }
 
@@ -129,9 +142,6 @@ float createMeasurement(bool postToAPI = false) {
   // Truncate to 2 decimals
   // "Multiply your float number by 100. Turn it into an int. to truncate it. Turn it back into a float and divide by 100"
   voltage_truncated = float(int(voltage * 100)) / 100;
-
-  Serial.print("Voltage: ");
-  Serial.println(voltage_truncated);
 
   // Set status-LED.. status
   if (voltage_truncated < WARNING_VOLTAGE) {
@@ -169,6 +179,8 @@ void sendMeasurement(float measurement) {
     https.addHeader("Content-Type", "application/json");
     https.POST(json);
     https.end();
+
+    shouldSleep = true;
   }
 }
 
