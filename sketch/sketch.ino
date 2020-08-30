@@ -48,11 +48,14 @@ int maxWiFiFailCount = 25; // Arbitrary "it has probably failed by now"-count
 
 void setup(){
   Serial.begin(9600);
-
   delay(1000); // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
+  Serial.println();
 
-  DEBUG_PRINTLN("");
-  DEBUG_PRINTLN("DEBUG MODE ACTIVE");
+  #ifdef DEBUG
+    Serial.println("DEBUG MODE ACTIVE");
+  #else
+    Serial.println("PRODUCTION MODE ACTIVE");
+  #endif
 
   // Setup pins
   pinMode(LED_PIN, OUTPUT);
