@@ -31,13 +31,27 @@ const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert m
 
 // WiFi jank
 int wifiFailCount = 0;
+int maxWiFiFailCount = 25; // Arbitrary "it has probably failed by now"-count
 
-// TODO: Custom UserAgent?
+// Comment "#define DEBUG" for production
+// #define DEBUG
+
+// Debug functions
+#ifdef DEBUG
+  #define DEBUG_PRINT(x) Serial.print (x)
+  #define DEBUG_PRINTLN(x) Serial.println (x)
+#else
+  #define DEBUG_PRINT(x)
+  #define DEBUG_PRINTLN(x)
+#endif
 
 void setup(){
   Serial.begin(9600);
 
   delay(1000); // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
+
+  DEBUG_PRINTLN("");
+  DEBUG_PRINTLN("DEBUG MODE ACTIVE");
 
   // Setup pins
   pinMode(LED_PIN, OUTPUT);
@@ -55,7 +69,7 @@ void setup(){
     wifiFailCount = wifiFailCount + 1;
 
     // Restart ESP if WiFi can't connect
-    if (wifiFailCount >= 50) { // Arbitrary "it has probably failed by now"-count
+    if (wifiFailCount >= maxWiFiFailCount) {
       ESP.restart();
     }
   }
@@ -84,6 +98,8 @@ void setup(){
 }
 
 void sendHeartbeat() {
+  DEBUG_PRINTLN("sendHeartbeat()");
+
   // Create JSON object
   const size_t CAPACITY = JSON_OBJECT_SIZE(1);
   StaticJsonDocument<CAPACITY> doc;
@@ -102,6 +118,8 @@ void sendHeartbeat() {
 
   // Handle POST request
   if (https.begin(*client, API_URL_HEARTBEAT)) {
+    DEBUG_PRINTLN("sendHeartbeat -> POST requset");
+
     https.addHeader("Content-Type", "application/json");
     https.POST(json);
     https.end();
@@ -110,7 +128,9 @@ void sendHeartbeat() {
 
 // Measure voltage of connected battery
 float createMeasurement(bool postToAPI = false) {
-  int samplesCount = 200; // Sample battery voltage 50 times
+  DEBUG_PRINTLN("createMeasurement()");
+
+  int samplesCount = 200; // Sample battery voltage 200 times
   RunningMedian samples = RunningMedian(samplesCount);
   for (int i = 0; i < samplesCount; i++) {
     adc_reading = ads.readADC_SingleEnded(0) * ADC_RESOLUTION;
@@ -118,12 +138,18 @@ float createMeasurement(bool postToAPI = false) {
     delay(50);
   }
 
-  // Get median sampled voltage
+  // Get median of all the sampled voltage readings
   voltage = samples.getMedian();
+
+  DEBUG_PRINT("Voltage: ");
+  DEBUG_PRINTLN(voltage);
 
   // Truncate to 2 decimals
   // "Multiply your float number by 100. Turn it into an int. to truncate it. Turn it back into a float and divide by 100"
   voltage_truncated = float(int(voltage * 100)) / 100;
+
+  DEBUG_PRINT("Voltage Truncated: ");
+  DEBUG_PRINTLN(voltage_truncated);
 
   // Set status-LED.. status
   if (voltage_truncated < WARNING_VOLTAGE) {
@@ -139,6 +165,8 @@ float createMeasurement(bool postToAPI = false) {
 
 // Send measured voltage to API
 void sendMeasurement(float measurement) {
+  DEBUG_PRINTLN("sendHeartbeat()");
+
   // Create JSON object
   const size_t CAPACITY = JSON_OBJECT_SIZE(2);
   StaticJsonDocument<CAPACITY> doc;
@@ -158,6 +186,8 @@ void sendMeasurement(float measurement) {
 
   // Handle POST request
   if (https.begin(*client, API_URL_MEASUREMENT)) {
+    DEBUG_PRINTLN("sendMeasurement -> POST requset");
+    
     https.addHeader("Content-Type", "application/json");
     https.POST(json);
     https.end();
@@ -170,26 +200,32 @@ void loop(){
   // Time since boot
   unsigned long currentMillis = millis();
 
-  // Send heartbeat to API
-  if (currentMillis - previousMillisHeartbeat >= heartbeatInterval) {
-    previousMillisHeartbeat = currentMillis;
-    sendHeartbeat();
-  }
-  
-  // Measure voltage on boot (with delay) for status LED
-  if (currentMillis > firstRunThreshold && isFirstRun) {
-    isFirstRun = false;
+  #ifdef DEBUG
     createMeasurement();
-  }
+    delay(3000);
+  #else
+    // Send heartbeat to API
+    if (currentMillis - previousMillisHeartbeat >= heartbeatInterval) {
+      previousMillisHeartbeat = currentMillis;
+      sendHeartbeat();
+    }
+    
+    // Measure voltage on boot (with delay) for status LED
+    if (currentMillis > firstRunThreshold && isFirstRun) {
+      isFirstRun = false;
+      createMeasurement();
+    }
 
-  // Measure voltage every 6 (logInterval) hours
-  if (currentMillis - previousMillisLogInterval >= logInterval) {
-    previousMillisLogInterval = currentMillis;
-    createMeasurement(true);
-  }
+    // Measure voltage every 6 (logInterval) hours
+    if (currentMillis - previousMillisLogInterval >= logInterval) {
+      previousMillisLogInterval = currentMillis;
+      createMeasurement(true);
+    }
 
-  // Turn on red "warning led" if voltage is less than 20%
-  if (warningLED) {
-    digitalWrite(LED_PIN, HIGH);
-  }
+    // Turn on red "warning led" if voltage is less than 20%
+    if (warningLED) {
+      digitalWrite(LED_PIN, HIGH);
+    }
+  #endif
 }
+
