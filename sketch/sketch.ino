@@ -32,9 +32,6 @@ const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert m
 // WiFi jank
 int wifiFailCount = 0;
 
-// Sleep tracking
-bool shouldSleep = false;
-
 // TODO: Custom UserAgent?
 
 void setup(){
@@ -85,18 +82,6 @@ void setup(){
   // NOTE: Disconnt connection between RST and D0 when programming
   ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
   ads.begin();
-
-  // Setup deep sleep
-  float sleepTimeInMS = DEEP_SLEEP_DURATION_HOURS * 60 * 60 * 1000 * 1000; // Converting from hours (DEEP_SLEEP_DURATION_HOURS) to microseconds
-  Serial.print("Sleeping for ");
-  Serial.print(int(DEEP_SLEEP_DURATION_HOURS));
-  Serial.println(" hour intervals");
-  
-  // Only sleep after a measurement
-  if (shouldSleep) {
-    ESP.deepSleep(sleepTimeInMS);
-    shouldSleep = false;
-  }
 }
 
 void sendHeartbeat() {
@@ -121,8 +106,6 @@ void sendHeartbeat() {
     https.addHeader("Content-Type", "application/json");
     https.POST(json);
     https.end();
-
-    shouldSleep = true;
   }
 }
 
@@ -179,8 +162,6 @@ void sendMeasurement(float measurement) {
     https.addHeader("Content-Type", "application/json");
     https.POST(json);
     https.end();
-
-    shouldSleep = true;
   }
 }
 
