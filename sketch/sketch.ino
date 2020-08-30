@@ -15,6 +15,7 @@ Adafruit_ADS1015 ads;
 bool isFirstRun = true;
 
 // Voltage measurements
+float raw_voltage;
 float adc_reading;
 float voltage;
 float voltage_truncated;
@@ -133,8 +134,20 @@ float createMeasurement(bool postToAPI = false) {
   int samplesCount = 200; // Sample battery voltage 200 times
   RunningMedian samples = RunningMedian(samplesCount);
   for (int i = 0; i < samplesCount; i++) {
-    adc_reading = ads.readADC_SingleEnded(0) * ADC_RESOLUTION;
-    samples.add(adc_reading * VOLTAGE_DIVIDER_RATIO);
+    raw_voltage = ads.readADC_SingleEnded(0);
+
+    /*
+      Only handle readings if they're valid and above 0
+      4095 is the max reading of the ADC
+      this probably means it's not connected rather than reading a voltage of 60+ volts ¯\_(ツ)_/¯
+    */
+    if (raw_voltage > 0 && raw_voltage < 4095) {
+      adc_reading = raw_voltage * ADC_RESOLUTION;
+      samples.add(adc_reading * VOLTAGE_DIVIDER_RATIO);
+    } else {
+      samples.add(0.0);
+    }
+
     delay(50);
   }
 
@@ -158,7 +171,8 @@ float createMeasurement(bool postToAPI = false) {
     warningLED = false;
   }
   
-  if (postToAPI) {
+  // Only POST if there's an actual real voltage reading
+  if (postToAPI && voltage > 0) {
     sendMeasurement(voltage_truncated);
   }
 }
