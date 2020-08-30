@@ -79,7 +79,6 @@ void setup(){
   ArduinoOTA.begin();
 
   // Setup ADS
-  // NOTE: Disconnt connection between RST and D0 when programming
   ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
   ads.begin();
 }
