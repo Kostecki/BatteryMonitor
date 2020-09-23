@@ -29,6 +29,7 @@ unsigned long previousMillisHeartbeat = 0;
 const long heartbeatInterval = HEARTBEAT_FREQUENCY_MINUTES * 60000; // Convert minutes (from HEARTBEAT_FREQUENCY_MINUTES) to milliseconds
 const long logInterval = LOG_INTERVAL_HOURS * 3600000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
 const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert minutes (from FIRST_RUN_THRESHOLD_MINUTES) to milliseconds
+// const long logInterval = LOG_INTERVAL_MINUTES * 60000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
 
 // WiFi jank
 int wifiFailCount = 0;
@@ -42,9 +43,24 @@ int maxWiFiFailCount = 25; // Arbitrary "it has probably failed by now"-count
   #define DEBUG_PRINT(x) Serial.print (x)
   #define DEBUG_PRINTLN(x) Serial.println (x)
 #else
-  #define DEBUG_PRINT(x)
-  #define DEBUG_PRINTLN(x)
+  #define DEBUG_PRINT(x) Telnet.print(x);
+  #define DEBUG_PRINTLN(x) Telnet.println(x);
 #endif
+
+// Setup Telnet server
+WiFiServer TelnetServer(23);
+WiFiClient Telnet;
+
+void handleTelnet() {
+  if (TelnetServer.hasClient()) {
+    if (!Telnet || !Telnet.connected()) {
+      if (Telnet) Telnet.stop();
+      Telnet = TelnetServer.available();
+    } else {
+      TelnetServer.available().stop();
+    }
+  }
+}
 
 void setup(){
   Serial.begin(9600);
@@ -80,6 +96,10 @@ void setup(){
   Serial.println();
   Serial.print("Conncted, IP address: ");
   Serial.println(WiFi.localIP());
+
+  // Telnet
+  TelnetServer.begin();
+  TelnetServer.setNoDelay(true);
 
   Serial.print("Measuring battery ");
   Serial.print(BATTERY_NAME);
@@ -147,6 +167,8 @@ float createMeasurement(bool postToAPI = false) {
     if (raw_voltage > 0 && raw_voltage < 4095) {
       adc_reading = raw_voltage * ADC_RESOLUTION;
       samples.add(adc_reading * VOLTAGE_DIVIDER_RATIO);
+
+      DEBUG_PRINTLN(adc_reading);
     } else {
       samples.add(0.0);
     }
@@ -173,7 +195,7 @@ float createMeasurement(bool postToAPI = false) {
   } else {
     warningLED = false;
   }
-  
+
   // Only POST if there's an actual real voltage reading
   if (postToAPI && voltage > 0) {
     sendMeasurement(voltage_truncated);
@@ -212,37 +234,33 @@ void sendMeasurement(float measurement) {
 }
 
 void loop(){
+  handleTelnet();
   ArduinoOTA.handle();
 
   // Time since boot
   unsigned long currentMillis = millis();
 
-  #ifdef DEBUG
+  // Send heartbeat to API
+  if (currentMillis - previousMillisHeartbeat >= heartbeatInterval) {
+    previousMillisHeartbeat = currentMillis;
+    sendHeartbeat();
+  }
+  
+  // Measure voltage on boot (with delay) for status LED
+  if (currentMillis > firstRunThreshold && isFirstRun) {
+    isFirstRun = false;
     createMeasurement();
-    delay(3000);
-  #else
-    // Send heartbeat to API
-    if (currentMillis - previousMillisHeartbeat >= heartbeatInterval) {
-      previousMillisHeartbeat = currentMillis;
-      sendHeartbeat();
-    }
-    
-    // Measure voltage on boot (with delay) for status LED
-    if (currentMillis > firstRunThreshold && isFirstRun) {
-      isFirstRun = false;
-      createMeasurement();
-    }
+  }
 
-    // Measure voltage every 6 (logInterval) hours
-    if (currentMillis - previousMillisLogInterval >= logInterval) {
-      previousMillisLogInterval = currentMillis;
-      createMeasurement(true);
-    }
+  // Measure voltage every 6 (logInterval) hours
+  if (currentMillis - previousMillisLogInterval >= logInterval) {
+    previousMillisLogInterval = currentMillis;
+    createMeasurement(true);
+  }
 
-    // Turn on red "warning led" if voltage is less than 20%
-    if (warningLED) {
-      digitalWrite(LED_PIN, HIGH);
-    }
-  #endif
+  // Turn on red "warning led" if voltage is less than 20%
+  if (warningLED) {
+    digitalWrite(LED_PIN, HIGH);
+  }
 }
 
