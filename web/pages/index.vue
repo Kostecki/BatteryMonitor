@@ -10,20 +10,6 @@
       />
     </v-col>
     <div v-else class="wrap d-flex flex-wrap">
-      <!-- <v-col cols="12">
-        <v-toolbar dense>
-          <v-btn icon>
-            <v-icon>mdi-magnify</v-icon>
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn icon>
-            <v-icon>mdi-heart</v-icon>
-          </v-btn>
-          <v-btn icon>
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </v-toolbar>
-      </v-col> -->
       <v-col
         v-for="battery in sortedBatteries"
         :key="battery.name"

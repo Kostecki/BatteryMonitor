@@ -7,7 +7,12 @@
   >
     <v-card>
       <v-card-title class="headline">
-        <div>{{ modalState.title }}</div>
+        <div class="modal-title">
+          {{ modalState.title }}
+          <v-icon @click="navigateToBattery">
+            mdi-poll
+          </v-icon>
+        </div>
         <div
           v-if="selectedBattery && selectedBattery.id"
           class="battery-id"
@@ -208,6 +213,11 @@ export default {
             }))
         }
       })
+    },
+    navigateToBattery () {
+      this.$router.push({ name: 'battery-id', params: { id: this.selectedBattery.id } })
+
+      this.dismissDialog()
     }
   }
 }
@@ -218,6 +228,18 @@ export default {
     display: flex !important;
     align-items: flex-start !important;
     flex-direction: column;
+  }
+
+  .modal-title {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+  }
+
+  .modal-title i:hover {
+    opacity: 0.7;
+    cursor: pointer;
   }
 
   .battery-id {

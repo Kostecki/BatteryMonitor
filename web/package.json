@@ -18,6 +18,7 @@
     "@nuxtjs/pwa": "^3.0.1",
     "@nuxtjs/vuetify": "^1.11.2",
     "axios": "^0.19.2",
+    "chart.js": "^2.9.3",
     "cross-env": "^7.0.2",
     "express": "^4.16.4",
     "firebase": "^7.18.0",
@@ -27,6 +28,7 @@
     "nuxt-sweetalert2": "^1.0.0",
     "swagger-jsdoc": "^4.0.0",
     "swagger-ui-express": "^4.1.4",
+    "vue-chartjs": "^3.5.1",
     "vuexfire": "^3.2.4"
   },
   "devDependencies": {

@@ -13,8 +13,22 @@ export const actions = {
   unbindBatteries: firestoreAction(({ unbindFirestoreRef }) => {
     unbindFirestoreRef('batteries')
   }),
-  bindMeasurements: firestoreAction(({ bindFirestoreRef }) => {
-    return bindFirestoreRef('measurements', db.collection('measurements'))
+  bindMeasurements: firestoreAction(({ bindFirestoreRef }, filter) => {
+    if (filter) {
+      return bindFirestoreRef(
+        'measurements',
+        db
+          .collection('measurements')
+          .where('batteryId', '==', filter)
+          .orderBy('createdAt')
+      )
+    } else {
+      return bindFirestoreRef(
+        'measurements',
+        db
+          .collection('measurements')
+      )
+    }
   }),
   unbindMeasurements: firestoreAction(({ unbindFirestoreRef }) => {
     unbindFirestoreRef('measurements')
