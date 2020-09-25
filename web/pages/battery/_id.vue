@@ -36,14 +36,7 @@ export default {
         },
         scales: {
           xAxes: [
-            {
-              gridLines: {
-                display: true
-              },
-              ticks: {
-                display: false
-              }
-            }
+            {}
           ],
           yAxes: [
             {
@@ -53,9 +46,6 @@ export default {
                 },
                 suggestedMin: 10,
                 suggestedMax: 15
-              },
-              gridLines: {
-                display: true
               }
             }
           ]
