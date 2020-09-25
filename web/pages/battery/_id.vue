@@ -27,7 +27,7 @@ export default {
         },
         title: {
           display: true,
-          text: '',
+          text: this.$route.params.id,
           fontSize: 24,
           fontColor: '#6b7280'
         },
@@ -38,7 +38,7 @@ export default {
           xAxes: [
             {
               gridLines: {
-                display: false
+                display: true
               },
               ticks: {
                 display: false
@@ -50,10 +50,12 @@ export default {
               ticks: {
                 userCallback (item) {
                   return `${item.toFixed(2)} V`
-                }
+                },
+                suggestedMin: 10,
+                suggestedMax: 15
               },
               gridLines: {
-                display: false
+                display: true
               }
             }
           ]
@@ -65,6 +67,12 @@ export default {
     ...mapState('modules/firebase', ['batteries'])
   },
   mounted () {
+    this.bindBatteries()
+      .then()
+      .catch((err) => {
+        // eslint-disable-next-line
+        console.error(err)
+      })
     this.bindMeasurements(this.batteryId)
       .then((resp) => {
         const labels = []
@@ -78,6 +86,8 @@ export default {
 
         this.fillData(labels, data)
 
+        console.log('balls')
+
         this.lineChartOptions.title.text = this.getBatteryFromId(this.batteryId)
       })
       .catch((err) => {
@@ -90,7 +100,7 @@ export default {
     this.unbindMeasurements()
   },
   methods: {
-    ...mapActions('modules/firebase', ['bindMeasurements', 'unbindMeasurements']),
+    ...mapActions('modules/firebase', ['bindBatteries', 'unbindBatteries', 'bindMeasurements', 'unbindMeasurements']),
     fillData (labels, data) {
       this.datacollection = {
         labels,
@@ -107,6 +117,7 @@ export default {
       this.loading = false
     },
     getBatteryFromId (batteryId) {
+      console.log(this.batteries)
       return this.batteries.find(battery => battery.id === batteryId).name
     }
   }
