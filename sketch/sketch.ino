@@ -29,7 +29,9 @@ unsigned long previousMillisHeartbeat = 0;
 const long heartbeatInterval = HEARTBEAT_FREQUENCY_MINUTES * 60000; // Convert minutes (from HEARTBEAT_FREQUENCY_MINUTES) to milliseconds
 const long logInterval = LOG_INTERVAL_HOURS * 3600000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
 const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert minutes (from FIRST_RUN_THRESHOLD_MINUTES) to milliseconds
-const long deepSleepDuration = DEEP_SLEEP_DURATION_HOURS * 3600000000; // Convert hours (from DEEP_SLEEP_DURATION_HOURS) to microseconds
+const long long deepSleepDuration = DEEP_SLEEP_DURATION_HOURS * 3600000000; // Convert hours (from DEEP_SLEEP_DURATION_HOURS) to microseconds
+
+const long deepSleepMathTest = deepSleepDuration / 3600000000; // Convert deep sleep microseconds back into hours for sanity checks and prints
 
 // WiFi jank
 int wifiFailCount = 0;
@@ -43,8 +45,8 @@ bool doSleep = true;
 
 // Debug functions
 #ifdef DEBUG
-  #define DEBUG_PRINT(x) Serial.print (x)
-  #define DEBUG_PRINTLN(x) Serial.println (x)
+  #define DEBUG_PRINT(x) Serial.print (x);
+  #define DEBUG_PRINTLN(x) Serial.println (x);
 #else
   #define DEBUG_PRINT(x) Telnet.print(x);
   #define DEBUG_PRINTLN(x) Telnet.println(x);
@@ -70,11 +72,17 @@ void setup(){
   delay(1000); // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
   Serial.println();
 
+  // Debug status
+  Serial.print("DEBUG MODE: ");
   #ifdef DEBUG
-    Serial.println("DEBUG MODE ACTIVE");
+    Serial.println("ACTIVE");
   #else
-    Serial.println("PRODUCTION MODE ACTIVE");
+    Serial.println("INACTIVE");
   #endif
+
+  // Deep sleep status
+  Serial.print("DEEP SLEEP: ");
+  doSleep ? Serial.println("ACTIVE") : Serial.println("INACTIVE");
 
   // Setup pins
   pinMode(LED_PIN, OUTPUT);
@@ -120,13 +128,8 @@ void setup(){
   Serial.print(BATTERY_ID);
   Serial.print(") ");
   Serial.print("every ");
-  doSleep ? Serial.print(DEEP_SLEEP_DURATION_HOURS) : Serial.print(LOG_INTERVAL_HOURS);
+  doSleep ? Serial.print(deepSleepMathTest) : Serial.print(logInterval / 3600000);
   Serial.println(" hour(s).");
-
-  if (doSleep) {
-    Serial.println("DEEP SLEEP IS ON");
-    // sleepActions();
-  }
 }
 
 void sendHeartbeat() {
@@ -246,8 +249,9 @@ void sleepActions() {
   createMeasurement(true);
 
   DEBUG_PRINT("Going to sleep for ");
-  DEBUG_PRINT(DEEP_SLEEP_DURATION_HOURS);
+  DEBUG_PRINT(deepSleepMathTest);
   DEBUG_PRINTLN(" hour(s)");
+
   ESP.deepSleep(deepSleepDuration);
 }
 
