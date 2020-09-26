@@ -29,11 +29,14 @@ unsigned long previousMillisHeartbeat = 0;
 const long heartbeatInterval = HEARTBEAT_FREQUENCY_MINUTES * 60000; // Convert minutes (from HEARTBEAT_FREQUENCY_MINUTES) to milliseconds
 const long logInterval = LOG_INTERVAL_HOURS * 3600000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
 const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert minutes (from FIRST_RUN_THRESHOLD_MINUTES) to milliseconds
-// const long logInterval = LOG_INTERVAL_MINUTES * 60000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
+const long deepSleepDuration = DEEP_SLEEP_DURATION_HOURS * 3600000000; // Convert hours (from DEEP_SLEEP_DURATION_HOURS) to microseconds
 
 // WiFi jank
 int wifiFailCount = 0;
 int maxWiFiFailCount = 25; // Arbitrary "it has probably failed by now"-count
+
+// Deep sleep
+bool doSleep = true;
 
 // Comment "#define DEBUG" for production
 // #define DEBUG
@@ -101,15 +104,6 @@ void setup(){
   TelnetServer.begin();
   TelnetServer.setNoDelay(true);
 
-  Serial.print("Measuring battery ");
-  Serial.print(BATTERY_NAME);
-  Serial.print(" (");
-  Serial.print(BATTERY_ID);
-  Serial.print(") ");
-  Serial.print("every ");
-  Serial.print(LOG_INTERVAL_HOURS);
-  Serial.println(" hour(s)");
-
   // Setup OTA
   ArduinoOTA.setPort(OTA_PORT);
   ArduinoOTA.setHostname(OTA_NAME);
@@ -119,6 +113,20 @@ void setup(){
   // Setup ADS
   ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
   ads.begin();
+
+  Serial.print("Measuring battery ");
+  Serial.print(BATTERY_NAME);
+  Serial.print(" (");
+  Serial.print(BATTERY_ID);
+  Serial.print(") ");
+  Serial.print("every ");
+  doSleep ? Serial.print(DEEP_SLEEP_DURATION_HOURS) : Serial.print(LOG_INTERVAL_HOURS);
+  Serial.println(" hour(s).");
+
+  if (doSleep) {
+    Serial.println("DEEP SLEEP IS ON");
+    // sleepActions();
+  }
 }
 
 void sendHeartbeat() {
@@ -204,7 +212,7 @@ float createMeasurement(bool postToAPI = false) {
 
 // Send measured voltage to API
 void sendMeasurement(float measurement) {
-  DEBUG_PRINTLN("sendHeartbeat()");
+  DEBUG_PRINTLN("sendMeasurement()");
 
   // Create JSON object
   const size_t CAPACITY = JSON_OBJECT_SIZE(2);
@@ -233,34 +241,52 @@ void sendMeasurement(float measurement) {
   }
 }
 
-void loop(){
-  handleTelnet();
-  ArduinoOTA.handle();
+void sleepActions() {
+  DEBUG_PRINTLN("sleepActions()");
+  createMeasurement(true);
 
+  DEBUG_PRINT("Going to sleep for ");
+  DEBUG_PRINT(DEEP_SLEEP_DURATION_HOURS);
+  DEBUG_PRINTLN(" hour(s)");
+  ESP.deepSleep(deepSleepDuration);
+}
+
+void loop(){
   // Time since boot
   unsigned long currentMillis = millis();
 
-  // Send heartbeat to API
-  if (currentMillis - previousMillisHeartbeat >= heartbeatInterval) {
-    previousMillisHeartbeat = currentMillis;
-    sendHeartbeat();
-  }
-  
-  // Measure voltage on boot (with delay) for status LED
+  // Wait for firstRunThreshold before doing any measurements
   if (currentMillis > firstRunThreshold && isFirstRun) {
+    DEBUG_PRINTLN("First run");
     isFirstRun = false;
-    createMeasurement();
+
+    if (doSleep) {
+      sleepActions();
+    } else {
+      // Measure voltage on boot (with delay) for status LED without posting to API
+      createMeasurement();
+    }
   }
 
-  // Measure voltage every 6 (logInterval) hours
-  if (currentMillis - previousMillisLogInterval >= logInterval) {
-    previousMillisLogInterval = currentMillis;
-    createMeasurement(true);
-  }
+  if (!doSleep) {
+    handleTelnet();
 
-  // Turn on red "warning led" if voltage is less than 20%
-  if (warningLED) {
-    digitalWrite(LED_PIN, HIGH);
+    ArduinoOTA.handle();
+    // Send heartbeat to API
+    if (currentMillis - previousMillisHeartbeat >= heartbeatInterval) {
+      previousMillisHeartbeat = currentMillis;
+      sendHeartbeat();
+    }
+
+    // Measure voltage every "logInterval" hours
+    if (currentMillis - previousMillisLogInterval >= logInterval) {
+      previousMillisLogInterval = currentMillis;
+      createMeasurement(true);
+    }
+
+    // Turn on red "warning led" if voltage is less than 20%
+    if (warningLED) {
+      digitalWrite(LED_PIN, HIGH);
+    }
   }
 }
-
