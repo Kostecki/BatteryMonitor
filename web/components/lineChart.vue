@@ -5,7 +5,12 @@ const { reactiveProp } = mixins
 export default {
   extends: Line,
   mixins: [reactiveProp],
-  props: ['options'],
+  props: {
+    options: {
+      type: Object,
+      required: true
+    }
+  },
   mounted () {
     this.renderChart(this.data, this.options)
   }
