@@ -79,7 +79,6 @@ export default {
   },
   data () {
     return {
-      test: false,
       loading: true,
       headers: [
         { text: 'Charge', value: 'charge' },

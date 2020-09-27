@@ -19,25 +19,12 @@
           </v-btn>
           <v-divider vertical />
 
-          <v-btn v-if="loggedIn && this.$nuxt.$route.name === 'index'" :value="1" @click="() => toggleBatteryModal('add')">
+          <v-btn v-if="loggedIn" :value="1" @click="() => toggleBatteryModal('add')">
             <span>New Battery</span>
             <v-icon>mdi-battery-positive</v-icon>
           </v-btn>
-          <v-divider v-if="loggedIn && this.$nuxt.$route.name === 'index'" vertical />
 
-          <v-btn v-if="loggedIn && this.$nuxt.$route.name === 'measurements'" :value="2" @click="toggleMeasurementModal">
-            <span>New Measurement</span>
-            <v-icon>mdi-chart-box-plus-outline</v-icon>
-          </v-btn>
-          <v-divider v-if="loggedIn && this.$nuxt.$route.name === 'measurements'" vertical />
-
-          <v-btn to="/measurements" :value="3">
-            <span>Measurements</span>
-            <v-icon>mdi-chart-box-outline</v-icon>
-          </v-btn>
-          <v-divider v-if="!loggedIn" vertical />
-
-          <v-btn v-if="!loggedIn" :value="4">
+          <v-btn v-if="!loggedIn" :value="2">
             <span>Log in</span>
             <v-icon>mdi-lock-open-outline</v-icon>
           </v-btn>
@@ -73,9 +60,6 @@ export default {
       switch (this.$nuxt.$route.name) {
         case 'index':
           this.activeTab = 0
-          break
-        case 'measurements':
-          this.activeTab = 3
           break
 
         default:
