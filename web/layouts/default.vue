@@ -4,7 +4,7 @@
       <!-- Status Alert -->
       <statusAlert />
 
-      <v-container>
+      <v-container fluid>
         <nuxt />
         <v-bottom-navigation
           grow

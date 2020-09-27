@@ -1,62 +1,66 @@
 <template>
   <v-row>
-    <v-col
-      v-if="loading"
-      align="center"
-    >
-      <v-progress-circular
-        indeterminate
-        color="primary"
-      />
+    <v-col cols="12" class="card-container">
+      <client-only>
+        <v-data-table
+          v-model="selectedRow"
+          :loading="loading"
+          dense
+          :headers="headers"
+          :items="tableItems"
+          :single-select="true"
+          show-select
+          :item-class="itemRowBackground"
+          :footer-props="{
+            'items-per-page-options': [10, 20, -1]
+          }"
+          :items-per-page="20"
+          class="elevation-1"
+        >
+          <template v-slot:[`item.charge`]="{ item }">
+            {{ item.charge }} %
+          </template>
+          <template v-slot:[`item.latestVoltage`]="{ item }">
+            {{ item.latestVoltage.toFixed(2) }}
+          </template>
+          <template v-slot:[`item.lastSeen`]="{ item }">
+            {{ formatTime(item.lastSeen) }}
+          </template>
+          <template v-slot:[`item.notifications`]="{ item }">
+            <div class="notifications-wrapper">
+              <v-simple-checkbox
+                :value="item.notifications.first"
+                color="yellow"
+                :ripple="false"
+                class="notification-checkbox"
+              />
+              <v-simple-checkbox
+                :value="item.notifications.second"
+                color="red"
+                :ripple="false"
+                class="notification-checkbox"
+              />
+            </div>
+          </template>
+          <template v-slot:[`item.edit`]="{ item }">
+            <v-icon
+              small
+              @click="editItem(item)"
+            >
+              mdi-pencil
+            </v-icon>
+          </template>
+        </v-data-table>
+      </client-only>
     </v-col>
-    <div v-else class="wrap d-flex flex-wrap">
-      <v-col
-        v-for="battery in sortedBatteries"
-        :key="battery.name"
-        cols="12"
-        sm="8"
-        md="6"
-        lg="5"
-        xl="3"
-        align="center"
-        :class="loggedIn ? 'single-battery-card' : null"
-      >
-        <v-card class="px-4" v-on="loggedIn ? {click: () => cardClick(battery) } : null">
-          <v-row align="center" no-gutters>
-            <v-col cols="3" class="d-flex flex-column justify-center" :style="{color: setChargeColor(battery.latestVoltage) }">
-              <div class="battery-charge">
-                {{ calcBatteryCharge(battery.latestVoltage) }}%
-              </div>
-              <div class="latest-voltage">
-                {{ battery.latestVoltage.toFixed(2) }} V
-              </div>
-            </v-col>
-            <v-col cols="9" class="card-main-content">
-              <v-card-title>
-                {{ battery.name }} ({{ battery.capacity }} Ah)
-              </v-card-title>
-              <v-card-subtitle>
-                <div>{{ `${battery.manufacturer}, ${battery.model}` }}</div>
-                <div class="last-seen">
-                  Updated: {{ formatTime(battery.updatedAt) }}
-                </div>
-              </v-card-subtitle>
-            </v-col>
-            <div class="border-notification notification-first" :class="setNotificationStatus(battery, 'first')" />
-            <div class="border-notification notification-second" :class="setNotificationStatus(battery, 'second')" />
-            <v-progress-linear
-              absolute
-              bottom
-              height="4"
-              color="rgb(150, 150, 150)"
-              :value="calcBatteryCharge(battery.latestVoltage)"
-              class="progress"
-            />
-          </v-row>
-        </v-card>
-      </v-col>
-    </div>
-
+    <v-col cols="12" class="chart-wrapper">
+      <div v-if="!loading" class="chart-container elevation-1">
+        <div v-if="selectedRow.length < 1" class="empty-table">
+          Choose a battery to view the graphed voltage measurements
+        </div>
+        <lineChart :chart-data="datacollection" :options="lineChartOptions" class="chart" />
+      </div>
+    </v-col>
     <batteryModal />
   </v-row>
 </template>
@@ -66,14 +70,60 @@ import advancedFormat from 'dayjs/plugin/advancedFormat'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import utils from '../utils/helperFunctions'
 import batteryModal from '../components/batteryModal'
+import lineChart from '../components/lineChart'
 
 export default {
   components: {
-    batteryModal
+    batteryModal,
+    lineChart
   },
   data () {
     return {
-      loading: true
+      test: false,
+      loading: true,
+      headers: [
+        { text: 'Charge', value: 'charge' },
+        { text: 'Name', value: 'name' },
+        { text: 'ID', value: 'id' },
+        { text: 'Manufacturer', value: 'manufacturer' },
+        { text: 'Model', value: 'model' },
+        { text: 'Capacity (Ah)', value: 'capacity' },
+        { text: 'Voltage (V)', value: 'latestVoltage' },
+        { text: 'Last Seen', value: 'lastSeen' },
+        { text: 'Nofitications', value: 'notifications', align: 'center', class: 'nofitications-row' },
+        { text: 'Edit', value: 'edit', sortable: false, align: 'center' }
+      ],
+      tableItems: [],
+      selectedRow: [],
+      datacollection: {
+        labels: [''],
+        datasets: []
+      },
+      lineChartOptions: {
+        maintainAspectRatio: false,
+        legend: {
+          display: false
+        },
+        tooltips: {
+          backgroundColor: '#17BF62'
+        },
+        scales: {
+          xAxes: [
+            {}
+          ],
+          yAxes: [
+            {
+              ticks: {
+                userCallback (item) {
+                  return `${item.toFixed(2)} V`
+                },
+                suggestedMin: 10,
+                suggestedMax: 14
+              }
+            }
+          ]
+        }
+      }
     }
   },
   computed: {
@@ -83,12 +133,54 @@ export default {
       return [...this.batteries].sort((a, b) => a.latestVoltage - b.latestVoltage)
     }
   },
+  watch: {
+    selectedRow (rowNew, rowOld) {
+      if (rowNew[0] && rowNew[0].name) {
+        this.bindMeasurements(rowNew[0].id)
+          .then((resp) => {
+            const labels = []
+            const data = []
+
+            resp.forEach((m) => {
+              const date = this.$dayjs(m.createdAt.seconds * 1000).format('DD-MM-YYYY HH:mm')
+              labels.push(date)
+              data.push(m.voltage)
+            })
+
+            this.fillData(labels, data)
+          })
+          .catch((err) => {
+            this.loading = false
+            // eslint-disable-next-line
+          console.error(err)
+          })
+      } else {
+        this.fillData([''], [])
+      }
+    }
+  },
   created () {
     // Extend dayjs
     this.$dayjs.extend(advancedFormat)
 
     this.bindBatteries()
-      .then(resp => (this.loading = false))
+      .then((resp) => {
+        resp.forEach((battery) => {
+          this.tableItems.push({
+            name: battery.name,
+            id: battery.id,
+            manufacturer: battery.manufacturer,
+            model: battery.model,
+            capacity: battery.capacity,
+            latestVoltage: battery.latestVoltage,
+            charge: this.calcBatteryCharge(battery.latestVoltage),
+            lastSeen: battery.lastSeen,
+            notifications: battery.notificationsSent
+          })
+        })
+
+        this.loading = false
+      })
       .catch((err) => {
         this.loading = false
         // eslint-disable-next-line
@@ -103,23 +195,41 @@ export default {
     ...mapMutations('modules/batteries', ['toggleBatteryModal', 'selectBattery']),
     calcBatteryCharge: utils.calcBatteryCharge,
     setChargeColor: utils.setChargeColor,
-    setNotificationStatus (battery, position) {
-      if (position === 'first' && battery.notificationsSent.first) {
-        return 'first-notification-sent'
-      } else if (position === 'second' && battery.notificationsSent.second) {
-        return 'second-notification-sent'
+    itemRowBackground (item) {
+      const charge = this.calcBatteryCharge(item)
+
+      if (charge >= 12.24) {
+        return 'battery-danger'
+      } else if (charge > 11.66) {
+        return 'battery-warning'
+      } else {
+        return 'battery-good'
       }
     },
-    cardClick (battery) {
-      if (battery.id) {
-        this.selectBattery(battery)
-        this.toggleBatteryModal('edit')
-      } else {
-        this.toggleBatteryModal('add')
+    fillData (labels, data) {
+      this.datacollection = {
+        labels,
+        datasets: [
+          {
+            label: 'Voltage',
+            backgroundColor: '#003f5c',
+            fill: false,
+            data
+          }
+        ]
       }
+    },
+    editItem (item) {
+      const battery = this.batteries.find(e => e.id === item.id)
+      this.selectBattery(battery)
+      this.toggleBatteryModal('edit')
+    },
+    getBatteryFromId (batteryId) {
+      return this.batteries.find(battery => battery.id === batteryId).name
     },
     formatTime (timestamp) {
-      return this.$dayjs(timestamp.seconds * 1000).format('MMMM Do, YYYY - HH:mm')
+      if (!timestamp) { return }
+      return this.$dayjs(timestamp.seconds * 1000).format('DD-MM-YYYY, HH:mm')
     }
   },
   head () {
@@ -140,80 +250,52 @@ export default {
     }
   }
 
-  .single-battery-card {
-    user-select: none;
-  }
-  .single-battery-card:hover {
-    opacity: 0.8;
+  .chart-wrapper {
+    padding: 0;
   }
 
-  .battery-charge {
-    font-size: 2em;
-    font-weight: bold;
+  .chart-container {
+    position: relative;
+    background: white;
+    border-radius: 4px;
+    margin: 0 12px 0 12px;
+    padding: 24px 12px;
   }
 
-  .latest-voltage {
-    font-size: 1.3em;
-    font-weight: bold;
-    margin-top: -8px;
-    opacity: 0.8;
-  }
-
-  .v-card__title {
-    font-size: 1.05rem;
-  }
-
-  .card-main-content {
-    text-align: left;
-  }
-
-  .last-seen {
-    margin-top: -3px;
-  }
-
-  .add-new-card {
-    min-height: 105px; /* Height of a battery card */
-    display: flex !important;
+  .empty-table {
+    display: flex;
     justify-content: center;
     align-items: center;
-    opacity: 0.3;
-  }
-  .add-new-card:hover {
-    opacity: 0.5;
-  }
-
-  .border-notification {
     position: absolute;
-    width: 8px;
-    height: 50%;
-    right: 0;
-  }
-
-  .notification-first {
     top: 0;
-    background: rgba(255, 214, 0, 0.1);
-    border-top-right-radius: 4px;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    border-radius: 4px;
+    color: white;
+    background: rgba(0, 0, 0, 0.8);
+    opacity: 0.3;
+    font-style: italic;
   }
 
-  .notification-second {
-    top: 50%;
-    background: rgba(244, 67, 54, 0.1);
-    border-bottom-right-radius: 4px;
+  .battery-danger td { border-color: #F44336; /* Vuetify base red*/ }
+  .battery-warning td { border-color: #FFD600; /* Vuetify yellow accent 4*/ }
+  .battery-good td { border-color: #4CAF50; /* Vuetify base green*/ }
+
+  tbody tr .text-start:first-of-type {
+    border-width: 8px;
+    border-left-style: solid;
+    padding-left: 8px;
+    margin-top: 2px;
   }
 
-  .first-notification-sent {
-    background: rgba(255, 214, 0, 1);
-  }
-  .second-notification-sent {
-    background: rgba(244, 67, 54, 1);
+  .notifications-wrapper {
+    display: flex;
+    justify-content: space-evenly;
   }
 
-  .v-bottom-navigation button {
-    height: 100% !important;
-  }
-
-  .progress {
-    width: calc(100% - 8px) !important;
-    border-bottom-left-radius: 4px;
+  .notification-checkbox {
+    margin: 0;
+    cursor: default;
   }
 </style>

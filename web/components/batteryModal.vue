@@ -7,11 +7,8 @@
   >
     <v-card>
       <v-card-title class="headline">
-        <div class="modal-title">
+        <div>
           {{ modalState.title }}
-          <v-icon @click="navigateToBattery">
-            mdi-poll
-          </v-icon>
         </div>
         <div
           v-if="selectedBattery && selectedBattery.id"
@@ -228,13 +225,6 @@ export default {
     display: flex !important;
     align-items: flex-start !important;
     flex-direction: column;
-  }
-
-  .modal-title {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-
   }
 
   .modal-title i:hover {
