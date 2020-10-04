@@ -10,13 +10,15 @@ const serviceAccount = require('../../../secrets/serviceAccountKey.json')
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.FIREBASE_DB_URL
+    databaseURL: 'https://batterymonitor-2b1c4.firebaseio.com'
   })
 }
 
 const refBatteries = admin.database().ref('batteries')
 const refMeasurements = admin.database().ref('measurements')
 const timestamp = admin.database.ServerValue.TIMESTAMP
+
+console.log(process.env.SLACK_WEBHOOK_URL)
 
 /**
  * @Swagger

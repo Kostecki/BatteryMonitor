@@ -3,9 +3,9 @@ import 'firebase/auth'
 import 'firebase/database'
 
 const config = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.FIREBASE_DB_URL,
+  apiKey: 'AIzaSyDONenKsaCwdLuC_L9WJXxGIwD0oziZFGY',
+  authDomain: 'batterymonitor-2b1c4.firebaseapp.com',
+  databaseURL: 'https://batterymonitor-2b1c4.firebaseio.com',
   projectId: 'batterymonitor-2b1c4'
 }
 
