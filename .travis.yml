@@ -1,3 +1,18 @@
+os: linux
+dist: xenial
+
+language: node_js
+node_js:
+  - node¨
+
+branches:
+  only:
+  - master
+
+cache:
+  directories:
+    - "node_modules"
+
 notifications:
   email: false
   slack:
@@ -5,15 +20,14 @@ notifications:
       secure: BzHQntJlJ5yiJlzJbobYvLPyR1Wrq17gJSwRLNJiFLGYMKnAcHQf0O7TiGMYJ4r9HYlD7ubamj62rHx4qfZEMnP0CRCpbNVVoyvUFRThfmJR7UHawUOTFG5vYTHtohJmY0eqYGZCIHT0b6s6M+Udwtsojuq0e/9qJGwzrKTGU3tfVMl2yFdTMGhCA5NxjVkuZk9P4rNeqVz7Vgx+PHB/VAEJCKRIk3AxHp334h+MDUo7zpvCyMH9WOz2kw+pVJNearKMLgK5UL6g/jw47pRnOOPpC1jWvkRWaDKuBxDTo91QDKtAoKcE95C4Q0FBcU20dAVcRLcMy6xL0/RPbszwei9XjC0DHN/hpxVqurwW/iHA+Vyx3UMPkEc0W54g3HL0US7v4JQPuXwx6Vl0M5Ig/0JCZZZPwmK9Oht/qZVpFPNYaa6fPHWjKphJ5unOIOnenEPbtuZIcaW8HuHQrIsDTay2+j9iZIQgHq8gsPZtLQtEYt8XYX3RHdc9iJ95fprRxOkbL7/2+CLjHlIeE+CkS4x9k318l4T9sBWf2h9VkI7CSR/qGprGBnzCqknzKgs92AsXFLvABFb9AFDXUeoukMkj9dI0FhOpqMpJ+D+dEH7tPlQ7mucLf7vAMN0wbqSCqgQdCa2QGiZwazSfMb4xSLnP9TZJxqAqUMichl5rzcE=
     on_success: always
     on_failure: always
-sudo: required
-branches:
-  only:
-  - master
+
 services:
-- docker
+  - docker
+
 script:
-- docker build -t kostecki/batterymonitor web
+  - docker build -t kostecki/batterymonitor web
+
 after_success:
-- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-- docker push kostecki/batterymonitor
-- curl -X POST -i $PORTAINER_WEBHOOK_URL
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push kostecki/batterymonitor
+  - curl -X POST -i $PORTAINER_WEBHOOK_URL
