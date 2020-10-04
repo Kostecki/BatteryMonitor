@@ -30,6 +30,7 @@ export const actions = {
     })
   },
   addBattery: ({ state, commit }, payload) => {
+    // eslint-disable-next-line
     return new Promise((resolve, reject) => {
       const ts = firebase.database.ServerValue.TIMESTAMP
       const { name, manufacturer, model, capacity, latestVoltage } = payload
@@ -53,6 +54,7 @@ export const actions = {
     })
   },
   editBattery: ({ state, commit }, payload) => {
+    // eslint-disable-next-line
     return new Promise((resolve, reject) => {
       refBatteries.child(payload.id).update(payload)
         .then(() => resolve())
@@ -60,6 +62,7 @@ export const actions = {
     })
   },
   deleteBattery: ({ state, commit }, batteryId) => {
+    // eslint-disable-next-line
     return new Promise((resolve, reject) => {
       refBatteries.child(batteryId).remove()
         .then(() => resolve())

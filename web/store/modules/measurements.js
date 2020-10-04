@@ -16,6 +16,7 @@ export const mutations = {
 
 export const actions = {
   getMeasurements: ({ state, commit }, batteryId) => {
+    // eslint-disable-next-line
     return new Promise((resolve, reject) => {
       commit('setLoading', true)
       refMeasurements
@@ -36,6 +37,7 @@ export const actions = {
     })
   },
   addMeasurement: ({ state, commit }, payload) => {
+    // eslint-disable-next-line
     return new Promise((resolve, reject) => {
       const ts = firebase.database.ServerValue.TIMESTAMP
       const { batteryId, voltage } = payload
