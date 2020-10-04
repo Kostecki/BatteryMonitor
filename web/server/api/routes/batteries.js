@@ -18,8 +18,6 @@ const refBatteries = admin.database().ref('batteries')
 const refMeasurements = admin.database().ref('measurements')
 const timestamp = admin.database.ServerValue.TIMESTAMP
 
-console.log(process.env.SLACK_WEBHOOK_URL)
-
 /**
  * @Swagger
  * tags:
@@ -222,7 +220,6 @@ router.post('/batteriesSlack', (req, res) => {
 
   refBatteries.once('value')
     .then((snapshot) => {
-      console.log('forEach')
       snapshot.forEach((battery) => {
         batteryList.push(battery.val())
       })
@@ -275,8 +272,6 @@ const sendNotification = (batteryId, newVoltage) => {
         })
           .catch(err => console.error(`Error updating notificationsSent: ${err}`))
       }
-
-      console.log(battery.notificationsSent, newVoltage)
 
       // Battery is at about 50%, but above 20%: send first notfication
       if (!battery.notificationsSent.first && (newVoltage < 12.10 && newVoltage > 11.6)) {

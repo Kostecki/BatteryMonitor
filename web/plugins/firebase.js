@@ -9,8 +9,6 @@ const config = {
   projectId: 'batterymonitor-2b1c4'
 }
 
-console.log(config, process, process.env)
-
 if (!firebase.apps.length) {
   firebase.initializeApp(config)
 }
