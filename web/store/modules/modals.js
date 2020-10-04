@@ -1,30 +1,29 @@
 export const state = () => ({
-  batteryModalVisible: false,
-  modalState: {
+  selectedBattery: null,
+  batteryModal: {
+    visible: false,
     mode: null,
     title: null
-  },
-  selectedBattery: null
+  }
 })
 
 export const mutations = {
   toggleBatteryModal (state, mode) {
-    state.batteryModalVisible = !state.batteryModalVisible
+    state.batteryModal.visible = !state.batteryModal.visible
+    state.batteryModal.mode = mode
 
     switch (mode) {
       case 'add':
-        state.modalState.mode = 'add'
-        state.modalState.title = 'Add New Battery'
+        state.batteryModal.title = 'Add New Battery'
         break
 
       case 'edit':
-        state.modalState.mode = 'edit'
-        state.modalState.title = 'Edit Battery'
+        state.batteryModal.title = 'Edit Battery'
         break
 
       default:
-        state.modalState.mode = null
-        state.modalState.title = null
+        state.batteryModal.mode = null
+        state.batteryModal.title = null
         break
     }
   },

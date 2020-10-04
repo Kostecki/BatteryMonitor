@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="batteryModalVisible"
+    v-model="batteryModal.visible"
     :retain-focus="false"
     persistent
     max-width="380"
@@ -8,7 +8,7 @@
     <v-card>
       <v-card-title class="headline">
         <div>
-          {{ modalState.title }}
+          {{ batteryModal.title }}
         </div>
         <div
           v-if="selectedBattery && selectedBattery.id"
@@ -63,7 +63,7 @@
           color="red darken-1"
           text
           class="ml-2"
-          @click="deleteBattery"
+          @click="removeBattery"
         >
           Delete
         </v-btn>
@@ -78,7 +78,6 @@
         <v-btn
           color="blue darken-1"
           text
-          :disabled="!valid"
           @click="saveBattery"
         >
           Save
@@ -89,7 +88,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   data () {
@@ -119,10 +118,13 @@ export default {
     }
   },
   computed: {
-    ...mapState('modules/batteries', ['batteryModalVisible', 'modalState', 'selectedBattery'])
+    ...mapState('modules/modals', ['batteryModal', 'selectedBattery']),
+    modalVisible () {
+      return this.batteryModal.visible
+    }
   },
   watch: {
-    batteryModalVisible (val) {
+    modalVisible (val) {
       if (val && this.selectedBattery) {
         this.modalValues.name.value = this.selectedBattery.name
         this.modalValues.manufacturer.value = this.selectedBattery.manufacturer
@@ -133,8 +135,9 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('modules/batteries', ['toggleBatteryModal', 'deselectBattery']),
-    ...mapMutations('modules/statusAlert', ['toggleAlert']),
+    ...mapActions('modules/shared', ['toggleAlert']),
+    ...mapMutations('modules/modals', ['toggleBatteryModal', 'deselectBattery']),
+    ...mapActions('modules/batteries', ['addBattery', 'editBattery', 'deleteBattery']),
     dismissDialog () {
       this.$refs.form.reset()
       this.deselectBattery()
@@ -146,43 +149,52 @@ export default {
         payload[key] = this.modalValues[key].value
       })
 
-      switch (this.modalState.mode) {
+      switch (this.batteryModal.mode) {
         case 'add':
-          this.$axios.$post('/api/battery', payload)
-            .then(() => this.toggleAlert({
-              showAlert: true,
-              alertType: 'success',
-              alertMessage: 'New battery successfully created'
-            }))
-            .catch(err => this.toggleAlert({
-              showAlert: true,
-              alertType: 'error',
-              alertMessage: `Something went wrong creating battery: ${err}`
-            }))
+          this.addBattery(payload)
+            .then(() => {
+              this.dismissDialog()
+              this.toggleAlert({
+                visible: true,
+                type: 'success',
+                message: 'New battery successfully created'
+              })
+            }) // Message
+            .catch((error) => {
+              this.toggleAlert({
+                visible: true,
+                type: 'error',
+                message: `Something went wrong creating battery: ${error}`
+              })
+            })
           break
 
         case 'edit':
           // Add battery id to payload to edit the right battery
           payload.id = this.selectedBattery.id
-          this.$axios.$put('/api/battery', payload)
-            .then(() => this.toggleAlert({
-              showAlert: true,
-              alertType: 'success',
-              alertMessage: 'Battery successfully updated'
-            }))
-            .catch(err => this.toggleAlert({
-              showAlert: true,
-              alertType: 'error',
-              alertMessage: `Something went wrong updating battery: ${err}`
-            }))
+          this.editBattery(payload)
+            .then(() => {
+              this.dismissDialog()
+              this.toggleAlert({
+                visible: true,
+                type: 'success',
+                message: 'Battery successfully updated'
+              })
+            })
+            .catch((error) => {
+              this.toggleAlert({
+                visible: true,
+                type: 'error',
+                message: `Something went wrong updating battery: ${error}`
+              })
+            })
           break
 
         default:
           break
       }
-      this.dismissDialog()
     },
-    deleteBattery () {
+    removeBattery () {
       this.$swal.fire({
         title: 'Are you sure?',
         text: "You won't be able to revert this!",
@@ -193,28 +205,24 @@ export default {
         confirmButtonText: 'Yes, delete it!'
       }).then((result) => {
         if (result.value) {
-          this.$axios.$delete(`/api/battery/${this.selectedBattery.id}`)
+          this.deleteBattery(this.selectedBattery.id)
             .then(() => {
-              this.toggleAlert({
-                showAlert: true,
-                alertType: 'success',
-                alertMessage: 'Battery successfully deleted'
-              })
-
               this.dismissDialog()
+              this.toggleAlert({
+                visible: true,
+                type: 'success',
+                message: 'Battery successfully deleted'
+              })
             })
-            .catch(err => this.toggleAlert({
-              showAlert: true,
-              alertType: 'error',
-              alertMessage: `Something went wrong deleting battery: ${err}`
-            }))
+            .catch((error) => {
+              this.toggleAlert({
+                visible: true,
+                type: 'error',
+                message: `Something went wrong deleting battery: ${error}`
+              })
+            })
         }
       })
-    },
-    navigateToBattery () {
-      this.$router.push({ name: 'battery-id', params: { id: this.selectedBattery.id } })
-
-      this.dismissDialog()
     }
   }
 }

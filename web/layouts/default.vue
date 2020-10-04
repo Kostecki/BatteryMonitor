@@ -1,8 +1,7 @@
 <template>
   <v-app id="main" :style="{background: $vuetify.theme.themes['light'].background}">
     <v-main>
-      <!-- Status Alert -->
-      <statusAlert />
+      <alert />
 
       <v-container fluid>
         <nuxt />
@@ -19,14 +18,20 @@
           </v-btn>
           <v-divider vertical />
 
-          <v-btn v-if="loggedIn" :value="1" @click="() => toggleBatteryModal('add')">
+          <v-btn v-if="authenticated" :value="1" @click="() => toggleBatteryModal('add')">
             <span>New Battery</span>
             <v-icon>mdi-battery-positive</v-icon>
           </v-btn>
+          <v-divider v-if="authenticated" vertical />
 
-          <v-btn v-if="!loggedIn" :value="2">
+          <v-btn v-if="!authenticated" :value="2" @click="$router.push('/login')">
             <span>Log in</span>
             <v-icon>mdi-lock-open-outline</v-icon>
+          </v-btn>
+
+          <v-btn v-if="authenticated" :value="3" @click="logout">
+            <span>Log out</span>
+            <v-icon>mdi-lock-outline</v-icon>
           </v-btn>
         </v-bottom-navigation>
       </v-container>
@@ -35,12 +40,15 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
-import statusAlert from '../components/statusAlert'
+import * as firebase from 'firebase/app'
+import 'firebase/auth'
+
+import { mapState, mapMutations, mapActions } from 'vuex'
+import alert from '../components/shared/alert'
 
 export default {
   components: {
-    statusAlert
+    alert
   },
   data () {
     return {
@@ -48,24 +56,40 @@ export default {
     }
   },
   computed: {
-    ...mapState(['loggedIn'])
+    ...mapState('modules/auth', ['authenticated'])
   },
-  created () {
+  mounted () {
+    this.setupFirebase()
     this.setActiveTab()
   },
   methods: {
-    ...mapMutations('modules/batteries', ['toggleBatteryModal']),
-    ...mapMutations('modules/measurements', ['toggleMeasurementModal']),
+    ...mapMutations('modules/modals', ['toggleBatteryModal']),
+    ...mapActions('modules/auth', ['autoSignIn', 'signOut']),
+    setupFirebase () {
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          this.autoSignIn()
+        }
+      })
+    },
     setActiveTab () {
       switch (this.$nuxt.$route.name) {
         case 'index':
           this.activeTab = 0
           break
 
+        case 'login':
+          this.activeTab = 2
+          break
+
         default:
           this.activeTab = null
           break
       }
+    },
+    logout () {
+      this.signOut()
+        .then(() => this.$router.push('/'))
     }
   }
 }

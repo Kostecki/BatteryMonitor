@@ -1,60 +1,58 @@
 <template>
   <v-row>
     <v-col cols="12" class="card-container">
-      <client-only>
-        <v-data-table
-          v-model="selectedRow"
-          :loading="loading"
-          dense
-          :headers="headers"
-          :items="tableItems"
-          :single-select="true"
-          show-select
-          :item-class="itemRowBackground"
-          :footer-props="{
-            'items-per-page-options': [10, 20, -1]
-          }"
-          :items-per-page="20"
-          class="elevation-1"
-        >
-          <template v-slot:[`item.charge`]="{ item }">
-            {{ item.charge }} %
-          </template>
-          <template v-slot:[`item.latestVoltage`]="{ item }">
-            {{ item.latestVoltage.toFixed(2) }}
-          </template>
-          <template v-slot:[`item.lastSeen`]="{ item }">
-            {{ formatTime(item.lastSeen) }}
-          </template>
-          <template v-slot:[`item.notifications`]="{ item }">
-            <div class="notifications-wrapper">
-              <v-simple-checkbox
-                :value="item.notifications.first"
-                color="yellow"
-                :ripple="false"
-                class="notification-checkbox"
-              />
-              <v-simple-checkbox
-                :value="item.notifications.second"
-                color="red"
-                :ripple="false"
-                class="notification-checkbox"
-              />
-            </div>
-          </template>
-          <template v-slot:[`item.edit`]="{ item }">
-            <v-icon
-              small
-              @click="editItem(item)"
-            >
-              mdi-pencil
-            </v-icon>
-          </template>
-        </v-data-table>
-      </client-only>
+      <v-data-table
+        v-model="selectedRow"
+        :loading="batteriesLoading"
+        dense
+        :headers="headers"
+        :items="tableItems"
+        :single-select="true"
+        show-select
+        :item-class="itemRowBackground"
+        :footer-props="{
+          'items-per-page-options': [10, 20, -1]
+        }"
+        :items-per-page="20"
+        class="elevation-1"
+      >
+        <template v-slot:[`item.charge`]="{ item }">
+          {{ calcBatteryCharge(item.latestVoltage) }} %
+        </template>
+        <template v-slot:[`item.latestVoltage`]="{ item }">
+          {{ item.latestVoltage.toFixed(2) }}
+        </template>
+        <template v-slot:[`item.lastSeen`]="{ item }">
+          {{ formatTime(item.lastSeen) }}
+        </template>
+        <template v-slot:[`item.notifications`]="{ item }">
+          <div class="notifications-wrapper">
+            <v-simple-checkbox
+              :value="item.notifications.first"
+              color="yellow"
+              :ripple="false"
+              class="notification-checkbox"
+            />
+            <v-simple-checkbox
+              :value="item.notifications.second"
+              color="red"
+              :ripple="false"
+              class="notification-checkbox"
+            />
+          </div>
+        </template>
+        <template v-slot:[`item.edit`]="{ item }">
+          <v-icon
+            small
+            @click="editItem(item)"
+          >
+            mdi-pencil
+          </v-icon>
+        </template>
+      </v-data-table>
     </v-col>
     <v-col cols="12" class="chart-wrapper">
-      <div v-if="!loading" class="chart-container elevation-1">
+      <div v-if="!batteriesLoading" class="chart-container elevation-1">
         <div v-if="selectedRow.length < 1" class="empty-table">
           Choose a battery to view the graphed voltage measurements
         </div>
@@ -66,9 +64,10 @@
 </template>
 
 <script>
-import advancedFormat from 'dayjs/plugin/advancedFormat'
-import { mapActions, mapState, mapMutations } from 'vuex'
+import { mapState, mapActions, mapMutations } from 'vuex'
+
 import utils from '../utils/helperFunctions'
+
 import batteryModal from '../components/batteryModal'
 import lineChart from '../components/lineChart'
 
@@ -79,7 +78,6 @@ export default {
   },
   data () {
     return {
-      loading: true,
       headers: [
         { text: 'Charge', value: 'charge' },
         { text: 'Name', value: 'name' },
@@ -89,8 +87,19 @@ export default {
         { text: 'Capacity (Ah)', value: 'capacity' },
         { text: 'Voltage (V)', value: 'latestVoltage' },
         { text: 'Last Seen', value: 'lastSeen' },
-        { text: 'Nofitications', value: 'notifications', align: 'center', class: 'nofitications-row' },
-        { text: 'Edit', value: 'edit', sortable: false, align: 'center' }
+        {
+          text: 'Nofitications',
+          value: 'notifications',
+          sortable: false,
+          align: 'center',
+          class: 'nofitications-row'
+        },
+        {
+          text: 'Edit',
+          value: 'edit',
+          sortable: false,
+          align: 'center'
+        }
       ],
       tableItems: [],
       selectedRow: [],
@@ -126,32 +135,67 @@ export default {
     }
   },
   computed: {
-    ...mapState(['loggedIn']),
-    ...mapState('modules/firebase', ['batteries']),
+    ...mapState('modules/auth', ['authenticated']),
+    ...mapState('modules/batteries', {
+      batteriesLoading: 'loading',
+      batteries: 'batteries'
+    }),
+    ...mapState('modules/measurements', {
+      measurementsLoading: 'loading',
+      measurements: 'measurements'
+    }),
     sortedBatteries () {
       return [...this.batteries].sort((a, b) => a.latestVoltage - b.latestVoltage)
     }
   },
   watch: {
-    selectedRow (rowNew, rowOld) {
-      if (rowNew[0] && rowNew[0].name) {
-        this.bindMeasurements(rowNew[0].id)
-          .then((resp) => {
-            const labels = []
-            const data = []
+    batteries (newRow, oldRow) {
+      if (newRow) {
+        const formattedData = []
 
+        this.batteries.forEach((batt) => {
+          const {
+            name,
+            id,
+            manufacturer,
+            model,
+            capacity,
+            latestVoltage,
+            lastSeen,
+            notificationsSent
+          } = batt
+
+          formattedData.push({
+            name,
+            id,
+            manufacturer,
+            model,
+            capacity,
+            latestVoltage,
+            charge: this.calcBatteryCharge(latestVoltage),
+            lastSeen,
+            notifications: notificationsSent
+          })
+
+          this.tableItems = formattedData
+        })
+      }
+    },
+    selectedRow (rowNew, rowOld) {
+      const row = rowNew[0]
+      if (row && row.name) {
+        const labels = []
+        const data = []
+
+        this.getMeasurements(row.id)
+          .then((resp) => {
             resp.forEach((m) => {
-              const date = this.$dayjs(m.createdAt.seconds * 1000).format('DD-MM-YYYY HH:mm')
+              const date = this.$dayjs(m.createdAt).format('DD-MM-YYYY HH:mm')
               labels.push(date)
               data.push(m.voltage)
             })
 
             this.fillData(labels, data)
-          })
-          .catch((err) => {
-            this.loading = false
-            // eslint-disable-next-line
-          console.error(err)
           })
       } else {
         this.fillData([''], [])
@@ -159,39 +203,14 @@ export default {
     }
   },
   created () {
-    // Extend dayjs
-    this.$dayjs.extend(advancedFormat)
-
-    this.bindBatteries()
-      .then((resp) => {
-        resp.forEach((battery) => {
-          this.tableItems.push({
-            name: battery.name,
-            id: battery.id,
-            manufacturer: battery.manufacturer,
-            model: battery.model,
-            capacity: battery.capacity,
-            latestVoltage: battery.latestVoltage,
-            charge: this.calcBatteryCharge(battery.latestVoltage),
-            lastSeen: battery.lastSeen,
-            notifications: battery.notificationsSent
-          })
-        })
-
-        this.loading = false
-      })
-      .catch((err) => {
-        this.loading = false
-        // eslint-disable-next-line
-        console.error(err)
-      })
-  },
-  beforeDestroy () {
-    this.unbindBatteries()
+    this.getBatteries()
   },
   methods: {
+    ...mapMutations('modules/modals', ['selectBattery', 'toggleBatteryModal']),
+    ...mapActions('modules/batteries', ['getBatteries']),
+    ...mapActions('modules/measurements', ['getMeasurements']),
     ...mapActions('modules/firebase', ['bindBatteries', 'unbindBatteries', 'bindMeasurements', 'unbindMeasurements']),
-    ...mapMutations('modules/batteries', ['toggleBatteryModal', 'selectBattery']),
+    // ...mapMutations('modules/batteries2', ['toggleBatteryModal', 'selectBattery']),
     calcBatteryCharge: utils.calcBatteryCharge,
     setChargeColor: utils.setChargeColor,
     itemRowBackground (item) {
@@ -228,7 +247,7 @@ export default {
     },
     formatTime (timestamp) {
       if (!timestamp) { return }
-      return this.$dayjs(timestamp.seconds * 1000).format('DD-MM-YYYY, HH:mm')
+      return this.$dayjs(timestamp).format('DD-MM-YYYY, HH:mm')
     }
   },
   head () {

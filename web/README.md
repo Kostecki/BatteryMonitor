@@ -1,6 +1,4 @@
-# web
-
-> My awe-inspiring Nuxt.js project
+# battery_monitor
 
 ## Build Setup
 

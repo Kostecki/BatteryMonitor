@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const swaggerUi = require('swagger-ui-express')
-const swaggerJSDoc = require('swagger-jsdoc');
+// const swaggerUi = require('swagger-ui-express')
+// const swaggerJSDoc = require('swagger-jsdoc');
 
 const app = express()
 
@@ -9,18 +9,18 @@ const app = express()
 const batteries = require('./routes/batteries.js')
 
 // Swagger setup
-const swaggerDefinition = {
-  info: {
-    title: 'Battery Monitor',
-    version: '1.0.0',
-  },
-  basePath: '/api'
-}
-const options = {
-  swaggerDefinition,
-  apis: ['./server/api/routes/*.js']
-}
-const swaggerSpec = swaggerJSDoc(options)
+// const swaggerDefinition = {
+//   info: {
+//     title: 'Battery Monitor',
+//     version: '1.0.0',
+//   },
+//   basePath: '/api'
+// }
+// const options = {
+//   swaggerDefinition,
+//   apis: ['./server/api/routes/*.js']
+// }
+// const swaggerSpec = swaggerJSDoc(options)
 
 // Middlware
 app.use(bodyParser.urlencoded({ extended: true }))

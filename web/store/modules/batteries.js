@@ -1,37 +1,69 @@
+import firebase, { refBatteries } from '../../plugins/firebase'
+
 export const state = () => ({
-  batteryModalVisible: false,
-  modalState: {
-    mode: null,
-    title: null
-  },
-  selectedBattery: null
+  batteries: [],
+  loading: true
 })
 
 export const mutations = {
-  toggleBatteryModal (state, mode) {
-    state.batteryModalVisible = !state.batteryModalVisible
-
-    switch (mode) {
-      case 'add':
-        state.modalState.mode = 'add'
-        state.modalState.title = 'Add New Battery'
-        break
-
-      case 'edit':
-        state.modalState.mode = 'edit'
-        state.modalState.title = 'Edit Battery'
-        break
-
-      default:
-        state.modalState.mode = null
-        state.modalState.title = null
-        break
-    }
+  setLoading: (state, payload) => {
+    state.loading = payload
   },
-  selectBattery (state, battery) {
-    state.selectedBattery = battery
+  setBatteries: (state, payload) => {
+    state.batteries = payload
+  }
+}
+
+export const actions = {
+  getBatteries: ({ state, commit }) => {
+    commit('setLoading', true)
+    refBatteries.on('value', (snapshot) => {
+      const data = []
+      snapshot.forEach((batt) => {
+        data.push({
+          ...batt.val(),
+          id: batt.key
+        })
+      })
+      commit('setBatteries', data)
+      commit('setLoading', false)
+    })
   },
-  deselectBattery (state) {
-    state.selectedBattery = null
+  addBattery: ({ state, commit }, payload) => {
+    return new Promise((resolve, reject) => {
+      const ts = firebase.database.ServerValue.TIMESTAMP
+      const { name, manufacturer, model, capacity, latestVoltage } = payload
+
+      const newBatteryRef = refBatteries.push({
+        name,
+        manufacturer,
+        model,
+        capacity,
+        latestVoltage,
+        notificationsSent: {
+          first: false,
+          second: false
+        },
+        createdAt: ts,
+        updatedAt: ts,
+        lastSeen: null
+      })
+        .then(() => resolve(newBatteryRef.key))
+        .catch(error => reject(error))
+    })
+  },
+  editBattery: ({ state, commit }, payload) => {
+    return new Promise((resolve, reject) => {
+      refBatteries.child(payload.id).update(payload)
+        .then(() => resolve())
+        .catch(error => reject(error))
+    })
+  },
+  deleteBattery: ({ state, commit }, batteryId) => {
+    return new Promise((resolve, reject) => {
+      refBatteries.child(batteryId).remove()
+        .then(() => resolve())
+        .catch(error => reject(error))
+    })
   }
 }
