@@ -33,7 +33,7 @@ export const actions = {
     // eslint-disable-next-line
     return new Promise((resolve, reject) => {
       const ts = firebase.database.ServerValue.TIMESTAMP
-      const { name, manufacturer, model, capacity, latestVoltage } = payload
+      const { name, manufacturer, model, capacity, latestVoltage, voltageDividerRatio } = payload
 
       const newBatteryRef = refBatteries.push({
         name,
@@ -47,7 +47,8 @@ export const actions = {
         },
         createdAt: ts,
         updatedAt: ts,
-        lastSeen: null
+        lastSeen: null,
+        voltageDividerRatio
       })
         .then(() => resolve(newBatteryRef.key))
         .catch(error => reject(error))

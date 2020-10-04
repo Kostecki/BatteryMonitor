@@ -123,7 +123,8 @@ router.post('/battery', (req, res) => {
     manufacturer,
     model,
     capacity,
-    latestVoltage
+    latestVoltage,
+    voltageDividerRatio
   } = req.body
 
   refBatteries.push({
@@ -138,7 +139,8 @@ router.post('/battery', (req, res) => {
     },
     createdAt: timestamp,
     updatedAt: timestamp,
-    lastSeen: null
+    lastSeen: null,
+    voltageDividerRatio
   })
     .then((newBattery) => {
       refBatteries.orderByKey().equalTo(newBattery.key).once('value')
@@ -156,7 +158,8 @@ router.put('/battery', (req, res) => {
     manufacturer,
     model,
     capacity,
-    latestVoltage
+    latestVoltage,
+    voltageDividerRatio
   } = req.body
 
   refBatteries.child(id).update({
@@ -165,6 +168,7 @@ router.put('/battery', (req, res) => {
     model,
     capacity,
     latestVoltage,
+    voltageDividerRatio,
     updatedAt: timestamp
   })
     .then(() => {

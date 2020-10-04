@@ -56,6 +56,12 @@
           suffix="Volt"
           required
         />
+        <v-text-field
+          v-model.number="modalValues.voltageDividerRatio.value"
+          label="Voltage Divider Ratio"
+          type="number"
+          step="0.01"
+        />
       </v-form>
       <v-card-actions>
         <v-btn
@@ -113,6 +119,9 @@ export default {
         },
         latestVoltage: {
           value: null
+        },
+        voltageDividerRatio: {
+          value: null
         }
       }
     }
@@ -131,6 +140,7 @@ export default {
         this.modalValues.model.value = this.selectedBattery.model
         this.modalValues.capacity.value = this.selectedBattery.capacity
         this.modalValues.latestVoltage.value = this.selectedBattery.latestVoltage
+        this.modalValues.voltageDividerRatio.value = this.selectedBattery.voltageDividerRatio
       }
     }
   },

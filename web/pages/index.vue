@@ -88,6 +88,12 @@ export default {
         { text: 'Voltage (V)', value: 'latestVoltage' },
         { text: 'Last Seen', value: 'lastSeen' },
         {
+          text: 'Voltage Divider Ratio',
+          value: 'voltageDividerRatio',
+          sortable: false,
+          align: 'center'
+        },
+        {
           text: 'Nofitications',
           value: 'notifications',
           sortable: false,
@@ -162,7 +168,8 @@ export default {
             capacity,
             latestVoltage,
             lastSeen,
-            notificationsSent
+            notificationsSent,
+            voltageDividerRatio
           } = batt
 
           formattedData.push({
@@ -174,7 +181,8 @@ export default {
             latestVoltage,
             charge: this.calcBatteryCharge(latestVoltage),
             lastSeen,
-            notifications: notificationsSent
+            notifications: notificationsSent,
+            voltageDividerRatio
           })
 
           this.tableItems = formattedData
