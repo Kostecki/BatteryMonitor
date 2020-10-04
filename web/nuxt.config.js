@@ -26,6 +26,14 @@ export default {
     host: '0.0.0.0'
   },
 
+  env: {
+    SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
+    FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
+    FIREBASE_AUTH_DOMAIN: process.env.FIREBASE_AUTH_DOMAIN,
+    FIREBASE_DB_URL: process.env.FIREBASE_DB_URL,
+    FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID
+  },
+
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: [
   ],
