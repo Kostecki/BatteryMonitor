@@ -22,8 +22,8 @@
         <template v-slot:[`item.latestVoltage`]="{ item }">
           {{ item.latestVoltage.toFixed(2) }}
         </template>
-        <template v-slot:[`item.lastSeen`]="{ item }">
-          {{ formatTime(item.lastSeen) }}
+        <template v-slot:[`item.updatedAt`]="{ item }">
+          {{ formatTime(item.updatedAt) }}
         </template>
         <template v-slot:[`item.notifications`]="{ item }">
           <div class="notifications-wrapper">
@@ -86,7 +86,7 @@ export default {
         { text: 'Model', value: 'model' },
         { text: 'Capacity (Ah)', value: 'capacity' },
         { text: 'Voltage (V)', value: 'latestVoltage' },
-        { text: 'Last Seen', value: 'lastSeen' },
+        { text: 'Last Update', value: 'updatedAt' },
         {
           text: 'Voltage Divider Ratio',
           value: 'voltageDividerRatio',
@@ -167,7 +167,7 @@ export default {
             model,
             capacity,
             latestVoltage,
-            lastSeen,
+            updatedAt,
             notificationsSent,
             voltageDividerRatio
           } = batt
@@ -180,7 +180,7 @@ export default {
             capacity,
             latestVoltage,
             charge: this.calcBatteryCharge(latestVoltage),
-            lastSeen,
+            updatedAt,
             notifications: notificationsSent,
             voltageDividerRatio
           })
@@ -255,7 +255,7 @@ export default {
     },
     formatTime (timestamp) {
       if (!timestamp) { return }
-      return this.$dayjs(timestamp).format('DD-MM-YYYY, HH:mm')
+      return this.$dayjs(timestamp).format('DD-MM-YYYY - HH:mm')
     }
   },
   head () {
