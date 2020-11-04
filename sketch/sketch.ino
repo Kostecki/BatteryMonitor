@@ -1,4 +1,13 @@
-#include "config.h";
+#include "base_config.h"
+// #include "board_configs/charge_dove.h"
+// #include "board_configs/cloud_raven.h"
+// #include "board_configs/current_swallow.h"
+// #include "board_configs/electric_chicken.h"
+// #include "board_configs/energy_magpie.h"
+// #include "board_configs/lightning_goose.h"
+// #include "board_configs/power_pelican.h"
+// #include "board_configs/storm_gobbler.h"
+// #include "board_configs/thunder_duck.h"
 
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
@@ -30,6 +39,7 @@ const long heartbeatInterval = HEARTBEAT_FREQUENCY_MINUTES * 60000; // Convert m
 const long logInterval = LOG_INTERVAL_HOURS * 3600000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
 const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert minutes (from FIRST_RUN_THRESHOLD_MINUTES) to milliseconds
 const long long deepSleepDuration = DEEP_SLEEP_DURATION_HOURS * 3600000000; // Convert hours (from DEEP_SLEEP_DURATION_HOURS) to microseconds
+// ^ double?
 
 const long deepSleepMathTest = deepSleepDuration / 3600000000; // Convert deep sleep microseconds back into hours for sanity checks and prints
 
