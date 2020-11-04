@@ -272,6 +272,7 @@ void loop(){
   // Wait for firstRunThreshold before doing any measurements
   if (currentMillis > firstRunThreshold && isFirstRun) {
     DEBUG_PRINTLN("First run");
+    sendHeartbeat();
     isFirstRun = false;
 
     if (doSleep) {
