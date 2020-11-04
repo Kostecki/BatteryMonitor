@@ -66,15 +66,23 @@ export default {
     }
   },
   computed: {
-    ...mapState('modules/shared', ['loading'])
+    ...mapState('modules/shared', ['loading']),
+    ...mapState('modules/auth', ['authenticated'])
   },
   methods: {
-    ...mapMutations('modules/shared', ['setMessage']),
+    ...mapMutations('modules/shared', ['toggleAlert']),
     ...mapActions('modules/auth', ['signIn']),
+
     submit () {
       if (this.valid) {
         this.signIn({ email: this.email, password: this.password })
-          .then(() => this.$router.push('/'))
+      }
+    }
+  },
+  watch: {
+    authenticated (newState, oldState) {
+      if (newState) {
+        this.$router.push('/')
       }
     }
   },

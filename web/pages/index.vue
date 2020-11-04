@@ -22,8 +22,8 @@
         <template v-slot:[`item.latestVoltage`]="{ item }">
           {{ item.latestVoltage.toFixed(2) }}
         </template>
-        <template v-slot:[`item.updatedAt`]="{ item }">
-          {{ formatTime(item.updatedAt) }}
+        <template v-slot:[`item.lastSeen`]="{ item }">
+          {{ formatTime(item.lastSeen) }}
         </template>
         <template v-slot:[`item.notifications`]="{ item }">
           <div class="notifications-wrapper">
@@ -86,7 +86,7 @@ export default {
         { text: 'Model', value: 'model' },
         { text: 'Capacity (Ah)', value: 'capacity' },
         { text: 'Voltage (V)', value: 'latestVoltage' },
-        { text: 'Last Update', value: 'updatedAt' },
+        { text: 'Last Seen', value: 'lastSeen' },
         {
           text: 'Voltage Divider Ratio',
           value: 'voltageDividerRatio',
@@ -167,7 +167,7 @@ export default {
             model,
             capacity,
             latestVoltage,
-            updatedAt,
+            lastSeen,
             notificationsSent,
             voltageDividerRatio
           } = batt
@@ -180,7 +180,7 @@ export default {
             capacity,
             latestVoltage,
             charge: this.calcBatteryCharge(latestVoltage),
-            updatedAt,
+            lastSeen,
             notifications: notificationsSent,
             voltageDividerRatio
           })
@@ -218,11 +218,10 @@ export default {
     ...mapActions('modules/batteries', ['getBatteries']),
     ...mapActions('modules/measurements', ['getMeasurements']),
     ...mapActions('modules/firebase', ['bindBatteries', 'unbindBatteries', 'bindMeasurements', 'unbindMeasurements']),
-    // ...mapMutations('modules/batteries2', ['toggleBatteryModal', 'selectBattery']),
     calcBatteryCharge: utils.calcBatteryCharge,
     setChargeColor: utils.setChargeColor,
     itemRowBackground (item) {
-      const charge = this.calcBatteryCharge(item)
+      const charge = item.latestVoltage
 
       if (charge >= 12.24) {
         return 'battery-danger'

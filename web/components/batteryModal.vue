@@ -145,8 +145,8 @@ export default {
     }
   },
   methods: {
-    ...mapActions('modules/shared', ['toggleAlert']),
     ...mapMutations('modules/modals', ['toggleBatteryModal', 'deselectBattery']),
+    ...mapMutations('modules/shared', ['toggleAlert']),
     ...mapActions('modules/batteries', ['addBattery', 'editBattery', 'deleteBattery']),
     dismissDialog () {
       this.$refs.form.reset()

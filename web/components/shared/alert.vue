@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   computed: {
@@ -31,7 +31,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions('modules/shared', ['toggleAlert', 'clearAlert']),
+    ...mapMutations('modules/shared', ['toggleAlert', 'clearAlert']),
     onClose () {
       this.clearAlert()
     }
