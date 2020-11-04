@@ -224,11 +224,11 @@ export default {
       const charge = item.latestVoltage
 
       if (charge >= 12.24) {
-        return 'battery-danger'
+        return 'battery-good'
       } else if (charge > 11.66) {
         return 'battery-warning'
       } else {
-        return 'battery-good'
+        return 'battery-danger'
       }
     },
     fillData (labels, data) {
