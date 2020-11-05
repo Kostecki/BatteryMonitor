@@ -221,11 +221,9 @@ export default {
     calcBatteryCharge: utils.calcBatteryCharge,
     setChargeColor: utils.setChargeColor,
     itemRowBackground (item) {
-      const charge = item.latestVoltage
-
-      if (charge >= 12.24) {
+      if (item.latestVoltage >= 12.24) {
         return 'battery-good'
-      } else if (charge > 11.66) {
+      } else if (item.latestVoltage > 11.66) {
         return 'battery-warning'
       } else {
         return 'battery-danger'

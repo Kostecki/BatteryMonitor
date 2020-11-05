@@ -69,6 +69,13 @@ export default {
     ...mapState('modules/shared', ['loading']),
     ...mapState('modules/auth', ['authenticated'])
   },
+  watch: {
+    authenticated (newState, oldState) {
+      if (newState) {
+        this.$router.push('/')
+      }
+    }
+  },
   methods: {
     ...mapMutations('modules/shared', ['toggleAlert']),
     ...mapActions('modules/auth', ['signIn']),
@@ -76,13 +83,6 @@ export default {
     submit () {
       if (this.valid) {
         this.signIn({ email: this.email, password: this.password })
-      }
-    }
-  },
-  watch: {
-    authenticated (newState, oldState) {
-      if (newState) {
-        this.$router.push('/')
       }
     }
   },
