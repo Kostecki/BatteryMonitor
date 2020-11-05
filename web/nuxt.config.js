@@ -82,6 +82,12 @@ export default {
     }
   },
 
+  pwa: {
+    meta: {
+      name: 'Battery Monitor'
+    }
+  },
+
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
   }
