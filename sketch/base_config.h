@@ -21,8 +21,7 @@ float ADC_RESOLUTION = 0.003;
 const int WARNING_VOLTAGE = 11.66;
 
 // Time Config
-const int sleepMinutes = 5;
-const int DEEP_SLEEP_DURATION_HOURS = 3; // Time to deep sleep before waking up. Max sleep time is about 3,5 hours (https://thingpulse.com/max-deep-sleep-for-esp8266/)
+const int DEEP_SLEEP_DURATION_MINUTES = 170; // Time to deep sleep before waking up. Max sleep time is about 3,5 hours (https://thingpulse.com/max-deep-sleep-for-esp8266/)
 const int HEARTBEAT_FREQUENCY_MINUTES = 60; // Frequency of heartbeats sent to API
 const int FIRST_RUN_THRESHOLD_MINUTES = 10; // Threshold after power on to initiate first measurement (without post to API)
-const int LOG_INTERVAL_HOURS = 3; // Hours between measurements
+const int LOG_INTERVAL_MINUTES = 180; // Mminutes between measurements

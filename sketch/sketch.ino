@@ -32,16 +32,39 @@ float voltage_truncated;
 // Warning-LED Status
 bool warningLED = false;
 
+// Print variable of type uint64_t
+// https://stackoverflow.com/questions/45974514/serial-print-uint64-t-in-arduino
+void print_uint64_t(uint64_t num) {
+  char rev[128]; 
+  char *p = rev+1;
+
+  while (num > 0) {
+    *p++ = '0' + ( num % 10);
+    num/= 10;
+  }
+  p--;
+  /*Print the number which is now in reverse*/
+  while (p > rev) {
+    Serial.print(*p--);
+  }
+}
+
+// Time conversion
+long microsToMinutes(uint64_t input) { return input / 60000000; }
+long microsToHours(uint64_t input) { return input / 3600000000; }
+long minutesToMillis(int input) { return input * 60000; }
+long hoursToMillis(int input) { return input * 3600000; }
+uint64_t hoursToMicros(int input) { return input * 3600000000; }
+uint64_t minutesToMicros(int input) { return input * 6000000; } // Doesn't actually convert to microseconds, but nothing works and i hate everything..
+
 // Intervals and time keeping
 unsigned long previousMillisLogInterval = 0;
 unsigned long previousMillisHeartbeat = 0;
-const long heartbeatInterval = HEARTBEAT_FREQUENCY_MINUTES * 60000; // Convert minutes (from HEARTBEAT_FREQUENCY_MINUTES) to milliseconds
-const long logInterval = LOG_INTERVAL_HOURS * 3600000; // Convert hours (from LOG_INTERVAL_HOURS) to milliseconds
-const long firstRunThreshold = FIRST_RUN_THRESHOLD_MINUTES * 60000; // Convert minutes (from FIRST_RUN_THRESHOLD_MINUTES) to milliseconds
-const long long deepSleepDuration = DEEP_SLEEP_DURATION_HOURS * 3600000000; // Convert hours (from DEEP_SLEEP_DURATION_HOURS) to microseconds
-// ^ double?
-
-const long deepSleepMathTest = deepSleepDuration / 3600000000; // Convert deep sleep microseconds back into hours for sanity checks and prints
+const long heartbeatInterval = minutesToMillis(HEARTBEAT_FREQUENCY_MINUTES);
+const long logInterval = minutesToMillis(LOG_INTERVAL_MINUTES);
+const long firstRunThreshold = minutesToMillis(FIRST_RUN_THRESHOLD_MINUTES);
+const uint64_t deepSleepDuration = minutesToMicros(DEEP_SLEEP_DURATION_MINUTES) * 10;
+const long deepSleepMathTest = microsToHours(deepSleepDuration);
 
 // WiFi jank
 int wifiFailCount = 0;
@@ -138,8 +161,8 @@ void setup(){
   Serial.print(BATTERY_ID);
   Serial.print(") ");
   Serial.print("every ");
-  doSleep ? Serial.print(deepSleepMathTest) : Serial.print(logInterval / 3600000);
-  Serial.println(" hour(s).");
+  doSleep ? Serial.print(microsToMinutes(deepSleepDuration)) : Serial.print(logInterval / 3600000);
+  Serial.println(" minute(s).");
 }
 
 void sendHeartbeat() {
@@ -259,8 +282,8 @@ void sleepActions() {
   createMeasurement(true);
 
   DEBUG_PRINT("Going to sleep for ");
-  DEBUG_PRINT(deepSleepMathTest);
-  DEBUG_PRINTLN(" hour(s)");
+  DEBUG_PRINT(microsToMinutes(deepSleepDuration));
+  DEBUG_PRINTLN(" minutes(s)");
 
   ESP.deepSleep(deepSleepDuration);
 }
