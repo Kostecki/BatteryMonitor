@@ -95,6 +95,27 @@ WiFiClient Telnet;
 WiFiClient espClient;
 PubSubClient client(MQTT_SERVER, MQTT_PORT, espClient);
 
+void blinkBuiltinLED(String mode) {
+  int blinks = 0;
+  if (mode == "wifi") {
+    blinks = 3;
+  } else if (mode == "mqtt") {
+    blinks = 4;
+  } else if (mode == "fail") {
+    blinks = 10;
+  }
+
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(3000);
+
+  for (int i = 0; i < blinks; i++) {
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(1000);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1000);
+  }
+}
+
 void handleTelnet() {
   if (TelnetServer.hasClient()) {
     if (!Telnet || !Telnet.connected()) {
@@ -108,7 +129,7 @@ void handleTelnet() {
 
 void setup(){
   Serial.begin(9600);
-  delay(1000); // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
+  delay(5000); // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
   Serial.println();
 
   // Debug status
@@ -125,6 +146,7 @@ void setup(){
 
   // Setup pins
   pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   // Setup WiFi with Mode, Hostname, SSID and Password
   Serial.println();
@@ -140,9 +162,11 @@ void setup(){
 
     // Restart ESP if WiFi can't connect
     if (wifiFailCount >= maxWiFiFailCount) {
+      blinkBuiltinLED("fail");
       ESP.restart();
     }
   }
+  blinkBuiltinLED("wifi");
   Serial.println();
   Serial.print("Conncted, IP address: ");
   Serial.println(WiFi.localIP());
@@ -155,11 +179,12 @@ void setup(){
     Serial.print(".");
 
     if (client.connect(DEVICE_NAME, MQTT_USER, MQTT_PASSWORD)) {
+      blinkBuiltinLED("mqtt");
       Serial.println();
       Serial.print("Connected to: ");
       Serial.println(MQTT_SERVER);
-
     } else {
+      blinkBuiltinLED("fail");
       Serial.print("Failed:");
       Serial.println(client.state());
       Serial.println("Retrying in 5 seconds");
@@ -291,7 +316,6 @@ void loop(){
     if (doSleep) {
       sleepActions();
     } else {
-      // Measure voltage on boot (with delay) for status LED without posting to API
       createMeasurement();
     }
   }
