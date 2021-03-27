@@ -16,6 +16,7 @@
 #include <ArduinoJson.h>
 #include <RunningMedian.h>
 #include <Adafruit_ADS1X15.h>
+#include <PubSubClient.h>
 
 // Setup ADS1015 ADC
 Adafruit_ADS1015 ads;
@@ -35,7 +36,7 @@ bool warningLED = false;
 // Print variable of type uint64_t
 // https://stackoverflow.com/questions/45974514/serial-print-uint64-t-in-arduino
 void print_uint64_t(uint64_t num) {
-  char rev[128]; 
+  char rev[128];
   char *p = rev+1;
 
   while (num > 0) {
@@ -52,6 +53,7 @@ void print_uint64_t(uint64_t num) {
 // Time conversion
 long microsToMinutes(uint64_t input) { return input / 60000000; }
 long microsToHours(uint64_t input) { return input / 3600000000; }
+long millisToMinutes(uint64_t input) { return input / 60000; }
 long minutesToMillis(int input) { return input * 60000; }
 long hoursToMillis(int input) { return input * 3600000; }
 uint64_t hoursToMicros(int input) { return input * 3600000000; }
@@ -88,6 +90,10 @@ bool doSleep = true;
 // Setup Telnet server
 WiFiServer TelnetServer(23);
 WiFiClient Telnet;
+
+// Setup MQTT connection
+WiFiClient espClient;
+PubSubClient client(MQTT_SERVER, MQTT_PORT, espClient);
 
 void handleTelnet() {
   if (TelnetServer.hasClient()) {
@@ -141,6 +147,26 @@ void setup(){
   Serial.print("Conncted, IP address: ");
   Serial.println(WiFi.localIP());
 
+  // Setup MQTT
+  Serial.println();
+  Serial.println("Attempting MQTT connection");
+  while (!client.connected()) {
+    delay(500);
+    Serial.print(".");
+
+    if (client.connect(DEVICE_NAME, MQTT_USER, MQTT_PASSWORD)) {
+      Serial.println();
+      Serial.print("Connected to: ");
+      Serial.println(MQTT_SERVER);
+
+    } else {
+      Serial.print("Failed:");
+      Serial.println(client.state());
+      Serial.println("Retrying in 5 seconds");
+      delay(5000);
+    }
+  }
+
   // Telnet
   TelnetServer.begin();
   TelnetServer.setNoDelay(true);
@@ -155,13 +181,14 @@ void setup(){
   ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
   ads.begin();
 
+  Serial.println();
   Serial.print("Measuring battery ");
   Serial.print(BATTERY_NAME);
   Serial.print(" (");
   Serial.print(BATTERY_ID);
   Serial.print(") ");
   Serial.print("every ");
-  doSleep ? Serial.print(microsToMinutes(deepSleepDuration)) : Serial.print(logInterval / 3600000);
+  doSleep ? Serial.print(microsToMinutes(deepSleepDuration)) : Serial.print(millisToMinutes(logInterval));
   Serial.println(" minute(s).");
 }
 
@@ -242,7 +269,8 @@ float createMeasurement(bool postToAPI = false) {
 
   // Only POST if there's an actual real voltage reading
   if (postToAPI && voltage > 0) {
-    sendMeasurement(voltage_truncated);
+    // sendMeasurement(voltage_truncated);
+    sendMeasurementMQTT(voltage_truncated);
   }
 }
 
@@ -277,6 +305,29 @@ void sendMeasurement(float measurement) {
   }
 }
 
+void sendMeasurementMQTT(float measurement) {
+  DEBUG_PRINTLN("sendMeasurementMQTT()");
+
+  // Create JSON object
+  const size_t CAPACITY = JSON_OBJECT_SIZE(3);
+  StaticJsonDocument<CAPACITY> doc;
+
+  // Populate JSON object
+  doc["key"] = MQTT_KEY;
+  doc["voltage"] = measurement;
+  doc["batteryName"] = BATTERY_NAME;
+
+  // Publish payload
+  char payload[256];
+  size_t payloadSize = serializeJson(doc, payload);
+
+  if (client.publish(MQTT_TOPIC, payload, payloadSize)) {
+    Serial.println("success");
+  } else {
+    Serial.println("fail");
+  }
+}
+
 void sleepActions() {
   DEBUG_PRINTLN("sleepActions()");
   createMeasurement(true);
@@ -289,6 +340,9 @@ void sleepActions() {
 }
 
 void loop(){
+  // Something, something MQTT
+  client.loop();
+
   // Time since boot
   unsigned long currentMillis = millis();
 
