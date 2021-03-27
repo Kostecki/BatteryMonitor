@@ -192,35 +192,6 @@ void setup(){
   Serial.println(" minute(s).");
 }
 
-void sendHeartbeat() {
-  DEBUG_PRINTLN("sendHeartbeat()");
-
-  // Create JSON object
-  const size_t CAPACITY = JSON_OBJECT_SIZE(1);
-  StaticJsonDocument<CAPACITY> doc;
-
-  // Populate JSON object
-  doc["batteryId"] = BATTERY_ID;
-
-  // Serialized JSON is required for the POST request
-  String json;
-  serializeJson(doc, json);
-
-  // HTTPS Client setup
-  std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
-  client->setInsecure();
-  HTTPClient https;
-
-  // Handle POST request
-  if (https.begin(*client, API_URL_HEARTBEAT)) {
-    DEBUG_PRINTLN("sendHeartbeat -> POST requset");
-
-    https.addHeader("Content-Type", "application/json");
-    https.POST(json);
-    https.end();
-  }
-}
-
 // Measure voltage of connected battery
 float createMeasurement(bool postToAPI = false) {
   DEBUG_PRINTLN("createMeasurement()");
@@ -268,45 +239,13 @@ float createMeasurement(bool postToAPI = false) {
   }
 
   // Only POST if there's an actual real voltage reading
-  if (postToAPI && voltage > 0) {
-    // sendMeasurement(voltage_truncated);
-    sendMeasurementMQTT(voltage_truncated);
+  if (postToAPI && voltage >= 1) {
+    sendMeasurement(voltage_truncated);
   }
 }
 
-// Send measured voltage to API
 void sendMeasurement(float measurement) {
   DEBUG_PRINTLN("sendMeasurement()");
-
-  // Create JSON object
-  const size_t CAPACITY = JSON_OBJECT_SIZE(2);
-  StaticJsonDocument<CAPACITY> doc;
-
-  // Populate JSON object
-  doc["batteryId"] = BATTERY_ID;
-  doc["voltage"] = measurement;
-
-  // Serialized JSON is required for the POST request
-  String json;
-  serializeJson(doc, json);
-
-  // HTTPS Client setup
-  std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
-  client->setInsecure();
-  HTTPClient https;
-
-  // Handle POST request
-  if (https.begin(*client, API_URL_MEASUREMENT)) {
-    DEBUG_PRINTLN("sendMeasurement -> POST requset");
-    
-    https.addHeader("Content-Type", "application/json");
-    https.POST(json);
-    https.end();
-  }
-}
-
-void sendMeasurementMQTT(float measurement) {
-  DEBUG_PRINTLN("sendMeasurementMQTT()");
 
   // Create JSON object
   const size_t CAPACITY = JSON_OBJECT_SIZE(3);
@@ -322,9 +261,7 @@ void sendMeasurementMQTT(float measurement) {
   size_t payloadSize = serializeJson(doc, payload);
 
   if (client.publish(MQTT_TOPIC, payload, payloadSize)) {
-    Serial.println("success");
-  } else {
-    Serial.println("fail");
+    DEBUG_PRINTLN("sendMeasurement -> MQTT publish");
   }
 }
 
@@ -349,7 +286,6 @@ void loop(){
   // Wait for firstRunThreshold before doing any measurements
   if (currentMillis > firstRunThreshold && isFirstRun) {
     DEBUG_PRINTLN("First run");
-    sendHeartbeat();
     isFirstRun = false;
 
     if (doSleep) {
@@ -362,13 +298,7 @@ void loop(){
 
   if (!doSleep) {
     handleTelnet();
-
     ArduinoOTA.handle();
-    // Send heartbeat to API
-    if (currentMillis - previousMillisHeartbeat >= heartbeatInterval) {
-      previousMillisHeartbeat = currentMillis;
-      sendHeartbeat();
-    }
 
     // Measure voltage every "logInterval" hours
     if (currentMillis - previousMillisLogInterval >= logInterval) {
