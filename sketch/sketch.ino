@@ -87,13 +87,13 @@ bool doSleep = true;
   #define DEBUG_PRINTLN(x) Telnet.println(x);
 #endif
 
+// Setup MQTT connection
+WiFiClient espClient;
+PubSubClient client(espClient);
+
 // Setup Telnet server
 WiFiServer TelnetServer(23);
 WiFiClient Telnet;
-
-// Setup MQTT connection
-WiFiClient espClient;
-PubSubClient client(MQTT_SERVER, MQTT_PORT, espClient);
 
 void blinkBuiltinLED(String mode) {
   int blinks = 0;
@@ -116,7 +116,38 @@ void blinkBuiltinLED(String mode) {
   }
 }
 
-void handleTelnet() {
+void setupWiFi() {
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  blinkBuiltinLED("wifi");
+  Serial.println();
+  Serial.println("Connected to WiFi");
+  Serial.print("SSID: ");
+  Serial.println(WIFI_SSID);
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+}
+
+void setupMQTT() {
+  client.setServer(MQTT_SERVER, 1883);
+
+  while (!client.connected()) {
+    if (client.connect(DEVICE_NAME, MQTT_USER, MQTT_PASSWORD)) {
+      blinkBuiltinLED("mqtt");
+      Serial.print("Connected to: ");
+      Serial.println(MQTT_SERVER);
+    } else {
+      blinkBuiltinLED("fail");
+      Serial.print("MQTT connection failed with state: ");
+      Serial.println(client.state());
+      delay(2000);
+    }
+  }
+}
+
+void setupTelnet() {
   if (TelnetServer.hasClient()) {
     if (!Telnet || !Telnet.connected()) {
       if (Telnet) Telnet.stop();
@@ -127,10 +158,41 @@ void handleTelnet() {
   }
 }
 
-void setup(){
+void setupOTA() {
+  ArduinoOTA.setPort(OTA_PORT);
+  ArduinoOTA.setHostname(OTA_NAME);
+  ArduinoOTA.setPassword(OTA_PASSWORD);
+  ArduinoOTA.begin();
+}
+
+void setupADS() {
+  ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
+  ads.begin();
+}
+
+void sleep() {
+  DEBUG_PRINTLN("sleep()");
+  DEBUG_PRINT("Going to sleep for ");
+  DEBUG_PRINT(microsToMinutes(deepSleepDuration));
+  DEBUG_PRINTLN(" minutes(s)");
+
+  // Problems with pubsubclient and deep sleep
+  // https://github.com/knolleary/pubsubclient/issues/452
+  client.disconnect(); 
+  espClient.flush();
+  while( client.state() != -1){  
+    delay(10);
+  }
+
+  ESP.deepSleep(deepSleepDuration);
+}
+
+void setup() {
+  // Serial setup
   Serial.begin(9600);
-  delay(5000); // Wait for serial to be ready https://www.arduino.cc/reference/en/language/functions/communication/serial/ifserial/
-  Serial.println();
+  while (!Serial) {
+    Serial.println("Waiting for serial connection..");
+  }
 
   // Debug status
   Serial.print("DEBUG MODE: ");
@@ -148,63 +210,26 @@ void setup(){
   pinMode(LED_PIN, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  // Setup WiFi with Mode, Hostname, SSID and Password
-  Serial.println();
-  Serial.print("Connecting to WiFi: ");
-  Serial.println(WIFI_SSID);
-  WiFi.mode(WIFI_STA);
-  WiFi.hostname(DEVICE_NAME);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    wifiFailCount = wifiFailCount + 1;
-
-    // Restart ESP if WiFi can't connect
-    if (wifiFailCount >= maxWiFiFailCount) {
-      blinkBuiltinLED("fail");
-      ESP.restart();
-    }
-  }
-  blinkBuiltinLED("wifi");
-  Serial.println();
-  Serial.print("Conncted, IP address: ");
-  Serial.println(WiFi.localIP());
+  // Setup WiFi
+  Serial.println("Connecting to WiFi..");
+  setupWiFi();
 
   // Setup MQTT
-  Serial.println();
-  Serial.println("Attempting MQTT connection");
-  while (!client.connected()) {
-    delay(500);
-    Serial.print(".");
+  Serial.println("Connecting to MQTT..");
+  setupMQTT();
 
-    if (client.connect(DEVICE_NAME, MQTT_USER, MQTT_PASSWORD)) {
-      blinkBuiltinLED("mqtt");
-      Serial.println();
-      Serial.print("Connected to: ");
-      Serial.println(MQTT_SERVER);
-    } else {
-      blinkBuiltinLED("fail");
-      Serial.print("Failed:");
-      Serial.println(client.state());
-      Serial.println("Retrying in 5 seconds");
-      delay(5000);
-    }
-  }
-
-  // Telnet
+  // Setup Telnet
+  Serial.println("Setting up Telnet connection..");
   TelnetServer.begin();
   TelnetServer.setNoDelay(true);
 
   // Setup OTA
-  ArduinoOTA.setPort(OTA_PORT);
-  ArduinoOTA.setHostname(OTA_NAME);
-  ArduinoOTA.setPassword(OTA_PASSWORD);
-  ArduinoOTA.begin();
+  Serial.println("Setting up OTA functionality..");
+  setupOTA();
 
   // Setup ADS
-  ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 3mV (default)
-  ads.begin();
+  Serial.println("Setting up ADS..");
+  setupADS();
 
   Serial.println();
   Serial.print("Measuring battery ");
@@ -278,33 +303,29 @@ void sendMeasurement(float measurement) {
 
   // Populate JSON object
   doc["key"] = MQTT_KEY;
-  doc["voltage"] = measurement;
+  doc["voltage"] = 09.89;
   doc["batteryName"] = BATTERY_NAME;
 
   // Publish payload
   char payload[256];
-  size_t payloadSize = serializeJson(doc, payload);
+  size_t n = serializeJson(doc, payload);
+  int payloadSize = static_cast<int>(n);
 
   if (client.publish(MQTT_TOPIC, payload, payloadSize)) {
-    DEBUG_PRINTLN("sendMeasurement -> MQTT publish");
+    DEBUG_PRINTLN("MQTT publish succeeded");
+    
+    if (doSleep) {
+      sleep();
+    }
+  } else {
+    DEBUG_PRINTLN("MQTT publish failed");
   }
-}
-
-void sleepActions() {
-  DEBUG_PRINTLN("sleepActions()");
-  createMeasurement(true);
-
-  DEBUG_PRINT("Going to sleep for ");
-  DEBUG_PRINT(microsToMinutes(deepSleepDuration));
-  DEBUG_PRINTLN(" minutes(s)");
-
-  ESP.deepSleep(deepSleepDuration);
 }
 
 void loop(){
   // Something, something MQTT
   client.loop();
-
+  
   // Time since boot
   unsigned long currentMillis = millis();
 
@@ -313,15 +334,11 @@ void loop(){
     DEBUG_PRINTLN("First run");
     isFirstRun = false;
 
-    if (doSleep) {
-      sleepActions();
-    } else {
-      createMeasurement();
-    }
+    createMeasurement(true);
   }
 
   if (!doSleep) {
-    handleTelnet();
+    setupTelnet();
     ArduinoOTA.handle();
 
     // Measure voltage every "logInterval" hours
