@@ -15,7 +15,7 @@
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include <RunningMedian.h>
-#include <Adafruit_ADS1015.h>
+#include <Adafruit_ADS1X15.h>
 
 // Setup ADS1015 ADC
 Adafruit_ADS1015 ads;
