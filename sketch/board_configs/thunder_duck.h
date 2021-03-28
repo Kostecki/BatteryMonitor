@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Thunder Duck";
 const char* OTA_NAME = "Thunder_Duck_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 4.95; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 4.95; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/thunder_duck";

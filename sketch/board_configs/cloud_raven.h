@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Cloud Raven";
 const char* OTA_NAME = "Cloud_Raven_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 5.05; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 5.05; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/cloud_raven";

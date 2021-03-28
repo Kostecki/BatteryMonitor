@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Current Swallow";
 const char* OTA_NAME = "Current_Swallow_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 4.911; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 4.911; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/current_swallow";

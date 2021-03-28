@@ -188,11 +188,13 @@ void sleep() {
 }
 
 void setup() {
+  // Setup pins
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+
   // Serial setup
+  Serial.println("Setting up serial connection..");
   Serial.begin(9600);
-  while (!Serial) {
-    Serial.println("Waiting for serial connection..");
-  }
 
   // Debug status
   Serial.print("DEBUG MODE: ");
@@ -205,10 +207,6 @@ void setup() {
   // Deep sleep status
   Serial.print("DEEP SLEEP: ");
   doSleep ? Serial.println("ACTIVE") : Serial.println("INACTIVE");
-
-  // Setup pins
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
 
   // Setup WiFi
   Serial.println("Connecting to WiFi..");
@@ -243,7 +241,7 @@ void setup() {
 }
 
 // Measure voltage of connected battery
-float createMeasurement(bool postToAPI = false) {
+void createMeasurement(bool postToAPI = false) {
   DEBUG_PRINTLN("createMeasurement()");
 
   int samplesCount = 200; // Sample battery voltage 200 times
@@ -298,20 +296,32 @@ void sendMeasurement(float measurement) {
   DEBUG_PRINTLN("sendMeasurement()");
 
   // Create JSON object
-  const size_t CAPACITY = JSON_OBJECT_SIZE(3);
+  const size_t CAPACITY = JSON_OBJECT_SIZE(2);
   StaticJsonDocument<CAPACITY> doc;
 
   // Populate JSON object
   doc["key"] = MQTT_KEY;
-  doc["voltage"] = 09.89;
-  doc["batteryName"] = BATTERY_NAME;
+  doc["voltage"] = measurement;
 
   // Publish payload
   char payload[256];
   size_t n = serializeJson(doc, payload);
   int payloadSize = static_cast<int>(n);
 
-  if (client.publish(MQTT_TOPIC, payload, payloadSize)) {
+  // Create MQTT topic string
+  char topic[sizeof(MQTT_TOPIC_BASE) + sizeof(MQTT_TOPIC)];
+  strcpy(topic, MQTT_TOPIC_BASE);
+  strcat(topic, MQTT_TOPIC);
+
+  DEBUG_PRINTLN("MQTT Info:");
+  DEBUG_PRINT("Topic: ");
+  DEBUG_PRINTLN(topic);
+  DEBUG_PRINT("Payload: ");
+  DEBUG_PRINTLN(payload);
+  DEBUG_PRINT("Payload size: ");
+  DEBUG_PRINTLN(payloadSize);
+
+  if (client.publish(topic, payload, payloadSize)) {
     DEBUG_PRINTLN("MQTT publish succeeded");
     
     if (doSleep) {

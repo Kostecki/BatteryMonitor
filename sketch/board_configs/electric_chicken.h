@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Electric Chicken";
 const char* OTA_NAME = "Electric_Chicken_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 4.98; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 4.98; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/electric_chicken";

@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Charge Dove";
 const char* OTA_NAME = "Charge_Dove_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 4.98; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 4.98; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/charge_dove";

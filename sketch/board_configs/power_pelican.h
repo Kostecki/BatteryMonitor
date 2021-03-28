@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Power Pelican";
 const char* OTA_NAME = "Power_Pelican_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 5.04; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 5.04; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/power_pelican";

@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Lightning Goose";
 const char* OTA_NAME = "Lightning_Goose_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 4.98; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 4.98; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/lightning_goose";

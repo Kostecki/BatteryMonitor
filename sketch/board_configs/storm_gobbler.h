@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Storm Gobbler";
 const char* OTA_NAME = "Storm_Gobbler_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 4.967; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 4.967; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/storm_gobbler";

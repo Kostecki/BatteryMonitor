@@ -7,4 +7,7 @@ const char* BATTERY_NAME = "Energy Magpie";
 const char* OTA_NAME = "Energy_Magpie_OTA";
 
 // ADC
-float VOLTAGE_DIVIDER_RATIO = 5.07; // Adjusted for resistor accuracy
+const float VOLTAGE_DIVIDER_RATIO = 5.07; // Adjusted for resistor accuracy
+
+// MQTT
+const char* MQTT_TOPIC = "/energy_magpie";
