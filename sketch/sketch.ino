@@ -321,7 +321,7 @@ void sendMeasurement(float measurement) {
   DEBUG_PRINT("Payload size: ");
   DEBUG_PRINTLN(payloadSize);
 
-  if (client.publish(topic, payload, payloadSize)) {
+  if (client.publish(topic, payload, payloadSize, false)) {
     DEBUG_PRINTLN("MQTT publish succeeded");
     
     if (doSleep) {
