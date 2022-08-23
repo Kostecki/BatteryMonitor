@@ -125,5 +125,6 @@ Temporary Items
 *.plist
 
 config.h
+base_config.h
 
 # End of https://www.toptal.com/developers/gitignore/api/flutter,dart,visualstudiocode,macos
